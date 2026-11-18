@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalibrasi Mesin Potong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--surface:#ffffff;--subtle:#f8fafc;--subtle2:#f1f5f9;
+  --ink:#0f172a;--ink2:#334155;--mute:#64748b;--line:#e2e8f0;--line2:#cbd5e1;
+  --pri:#2563eb;--pri-d:#1d4ed8;--pri-50:#eff6ff;--pri-100:#dbeafe;
+  --ok:#15803d;--ok-50:#f0fdf4;--ok-100:#dcfce7;
+  --warn:#b45309;--warn-50:#fffbeb;--warn-100:#fef3c7;
+  --bad:#b91c1c;--bad-50:#fef2f2;--bad-100:#fee2e2;
+  --vio:#7c3aed;--org:#ea580c;
+  --r:12px;--r-sm:8px;--sh:0 1px 2px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-feature-settings:"tnum" 1,"cv11" 1}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+/* ---------- header & tabs ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:12px 20px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--pri);display:grid;place-items:center;flex:none}
+.brand h1{font-size:17px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+.brand p{margin:0;color:var(--mute);font-size:12.5px}
+.brand .sp{flex:1}
+.tabs{display:flex;gap:2px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;border:0;background:none;padding:10px 14px;font-weight:600;font-size:13.5px;color:var(--mute);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:7px;align-items:center}
+.tab:hover{color:var(--ink2)}
+.tab[aria-selected="true"]{color:var(--pri);border-bottom-color:var(--pri)}
+.count{background:var(--subtle2);color:var(--ink2);border-radius:999px;padding:0 7px;font-size:11.5px;font-weight:600;line-height:18px}
+.tab[aria-selected="true"] .count{background:var(--pri-100);color:var(--pri-d)}
+
+/* ---------- layout ---------- */
+main{max-width:1120px;margin:0 auto;padding:20px 20px 80px}
+.view{display:none}.view.on{display:block}
+@media(max-width:860px){}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:15px;margin:0;font-weight:600}
+.card-h .desc{color:var(--mute);font-size:12.5px;margin:1px 0 0;font-weight:400}
+.card-h .sp{flex:1}
+.card-b{padding:16px 18px}
+.card-f{padding:12px 18px;border-top:1px solid var(--line);background:var(--subtle);border-radius:0 0 var(--r) var(--r);color:var(--mute);font-size:12.5px}
+
+/* ---------- controls ---------- */
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);margin:0 0 5px}
+.field .help{font-size:12px;color:var(--mute);margin-top:4px}
+.inp,select.inp{width:100%;height:38px;border:1px solid var(--line2);border-radius:var(--r-sm);padding:0 11px;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.inp:focus{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-100)}
+.inp-lg{height:48px;font-size:20px;font-weight:600}
+.unit{position:relative}.unit .inp{padding-right:40px}.unit::after{content:"mm";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--mute);font-size:12.5px;pointer-events:none}
+.btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line2);background:#fff;font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--subtle)}
+.btn-pri{background:var(--pri);border-color:var(--pri);color:#fff}.btn-pri:hover{background:var(--pri-d)}
+.btn-ghost{border-color:var(--pri-100);background:var(--pri-50);color:var(--pri-d)}.btn-ghost:hover{background:var(--pri-100);border-color:#bfdbfe}
+.btn-danger{color:var(--bad)}.btn-danger.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn-sm{height:30px;padding:0 10px;font-size:12.5px}
+.icon-btn{width:30px;height:30px;padding:0;justify-content:center;border-color:transparent;background:transparent;color:var(--mute)}
+.icon-btn:hover{background:var(--bad-50);color:var(--bad)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+
+/* ---------- pills ---------- */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ok{background:var(--ok-100);color:var(--ok)}.p-warn{background:var(--warn-100);color:var(--warn)}.p-bad{background:var(--bad-100);color:var(--bad)}.p-gray{background:var(--subtle2);color:var(--mute)}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:#fff}
+.kpi .l{font-size:12px;color:var(--mute);font-weight:500}
+.kpi .v{font-size:20px;font-weight:700;margin-top:2px;letter-spacing:-.01em}
+.kpi .s{font-size:11.5px;color:var(--mute)}
+
+/* ---------- hero result ---------- */
+.hero{border-radius:var(--r);background:var(--pri-50);border:1px solid var(--pri-100);padding:18px;text-align:center;margin-top:14px}
+.hero .l{font-size:12.5px;color:var(--ink2)}
+.hero .v{font-size:34px;font-weight:700;color:var(--pri-d);letter-spacing:-.02em;line-height:1.2;margin:4px 0}
+.hero .v small{font-size:16px;font-weight:600;color:var(--pri)}
+.hero.bad{background:var(--bad-50);border-color:var(--bad-100)}.hero.bad .v{color:var(--bad);font-size:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+.meta span{font-size:12.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.note{display:flex;gap:8px;align-items:flex-start;border-radius:var(--r-sm);padding:9px 12px;font-size:13px;margin-top:10px;text-align:left}
+.note.warn{background:var(--warn-50);border:1px solid var(--warn-100);color:#78350f}
+.note.info{background:var(--subtle);border:1px solid var(--line);color:var(--ink2)}
+.note svg{flex:none;margin-top:2px}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;background:var(--subtle);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 12px;margin:6px 0;overflow-x:auto}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:10px 0 0;font-size:13.5px}
+dl.kv dt{color:var(--mute)}dl.kv dd{margin:0;font-weight:500}
+
+/* ---------- table ---------- */
+.chart-model{display:grid;grid-template-columns:minmax(0,1fr)}
+.cm-chart{padding:16px 18px;min-width:0}
+.cm-model{padding:14px 18px 16px;border-top:1px solid var(--line);background:var(--subtle);border-radius:0 0 var(--r) var(--r)}
+.cm-model{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:10px 18px!important}
+.cm-model .cm-t{margin:0!important;font-size:13.5px;white-space:nowrap}
+#modelBox{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;flex:1;min-width:0}
+.cm-model .formula{margin:0;padding:4px 10px;font-size:12.5px;background:#fff}
+.cm-model dl.kv{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:0;font-size:12.5px}
+.cm-model dl.kv dt{margin-right:-8px}
+.cm-model dl.kv dt::after{content:":"}
+.cm-model .pill{font-size:11.5px;padding:1px 8px}
+.cm-model .note{margin:0;padding:3px 10px;font-size:12px;flex-basis:100%;background:transparent;border:0;color:var(--mute)}
+.cm-model .note svg{width:13px;height:13px;margin-top:1px}
+.cm-t{font-size:15px;font-weight:600;margin:0}
+
+.grid-find{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:16px;align-items:start}
+.grid-find .hero{padding:12px 14px;margin-top:10px}.grid-find .hero .v{font-size:27px}.grid-find .hero .meta{gap:6px}.grid-find .hero .meta span{font-size:12px}
+.grid-find .inp-lg{height:42px;font-size:18px}.grid-find .note{font-size:12.5px;padding:8px 10px}
+@media(max-width:960px){.grid-find{grid-template-columns:minmax(0,1fr)}}
+.tw-scroll{max-height:520px;overflow:auto}
+.tbl-card .t td,.tbl-card .t th{padding:9px 12px}
+.tw{overflow-x:auto}
+table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+.t th{position:sticky;top:0;background:var(--subtle);color:var(--ink2);font-weight:600;font-size:12.5px;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t tr:last-child td{border-bottom:0}
+.t tbody tr:hover td{background:var(--subtle)}
+.t tr.hl td{background:var(--pri-50)}
+.t .num{text-align:right}
+.t .strong{font-weight:700}
+.t .muted{color:var(--mute)}
+
+/* ---------- data entry ---------- */
+.set-list{display:flex;flex-direction:column;gap:10px}
+.set{border:1px solid var(--line);border-radius:var(--r);background:#fff;position:relative}
+#grpBody .set:not(.open) .cells{display:none}
+#grpBody .set:not(.open) .set-h{border-bottom:0}
+.set .tog{border:0;background:none;width:26px;height:26px;border-radius:6px;display:grid;place-items:center;cursor:pointer;flex:none}
+.set .tog:hover{background:var(--subtle2)}
+.set .tog .chev{width:7px;height:7px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);transition:transform .2s}
+.set.open .tog .chev{transform:rotate(45deg);margin-top:-3px}
+.set .gm{color:var(--ink2)}
+.set .ck{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--ok);color:#fff;display:none;place-items:center;box-shadow:0 0 0 3px #fff;z-index:1}
+.set.done{background:var(--ok-50);border-color:#bbf7d0}
+.set.done .ck{display:grid}
+.set.done .set-h{border-bottom-color:#bbf7d0}
+.set-h{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.set-h .lab{font-size:12px;color:var(--mute);font-weight:600}
+.set-h .unit{width:100%}.set-h>.unit{width:120px}.set-h .inp{height:34px;font-weight:700}.set-h .field{min-width:120px}
+.prog{flex:1;min-width:120px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute)}
+.bar{flex:1;height:6px;background:var(--subtle2);border-radius:99px;overflow:hidden;max-width:160px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .2s}
+.cells{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding:12px 14px}
+@media(max-width:760px){.cells{grid-template-columns:repeat(4,1fr)}}
+.cell{display:flex;flex-direction:column;gap:3px}
+.cell span{font-size:11px;color:var(--mute);font-weight:500}
+.cell .cl{display:flex;align-items:center;justify-content:space-between}
+.cdel{border:0;background:none;color:#94a3b8;font-size:15px;line-height:1;width:18px;height:18px;border-radius:4px;cursor:pointer;padding:0}
+.cdel:hover{background:var(--bad-50);color:var(--bad)}
+.cell .inp{height:34px;padding:0 8px;text-align:right}
+.inp.okv{border-color:#86efac;background:#fcfffd}
+.inp.bad{border-color:#fca5a5;background:var(--bad-50)}
+.empty{text-align:center;padding:36px 16px;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+
+/* ---------- steps / suggestions ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start}
+@media(max-width:760px){.steps{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);border-radius:var(--r);background:#fff;position:relative;transition:border-color .15s,background .15s}
+.step-h{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:12px 14px;cursor:pointer;border-radius:var(--r)}
+.step-h:hover{background:var(--subtle)}
+.step-h .tx{flex:1;min-width:0}
+.step-h .st{font-size:12px;color:var(--mute);margin-top:1px}
+.step-h .chev{width:8px;height:8px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);transition:transform .2s;margin:0 4px 4px;flex:none}
+.step.open .step-h .chev{transform:rotate(-135deg);margin-bottom:-2px}
+.step-b{display:none;padding:0 14px 12px}
+.step.open .step-b{display:block}
+.step .ck{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--ok);color:#fff;display:none;place-items:center;box-shadow:0 0 0 3px #fff}
+.step.done{background:var(--ok-50);border-color:#bbf7d0}
+.step.done .ck{display:grid}
+.step.done .no{color:var(--ok)}
+.step.done .st{color:var(--ok);font-weight:600}
+.step.done .step-h:hover{background:transparent}
+.step.cur{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-50)}
+.step .no{font-size:11.5px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.04em}
+.step h3{margin:2px 0 2px;font-size:14px}
+.step p{margin:0 0 8px;font-size:12.5px;color:var(--mute)}
+.step .cnt{display:inline-block;background:var(--pri-100);color:var(--pri-d);border-radius:999px;padding:0 8px;font-weight:600;font-size:11.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--pri-100);background:var(--pri-50);color:var(--pri-d);border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600;cursor:pointer}
+.chip:hover{background:var(--pri-100)}
+.done{font-size:12.5px;color:var(--ok);font-weight:600}
+
+/* ---------- details ---------- */
+details.acc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:14px 18px;font-weight:600;font-size:15px}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);transition:transform .2s}
+details.acc[open]>summary::after{transform:rotate(-135deg)}
+details.acc[open]>summary{border-bottom:1px solid var(--line)}
+textarea.inp{height:auto;min-height:110px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+
+/* ---------- chart ---------- */
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--mute);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button[aria-pressed="true"]{background:var(--pri-50);color:var(--pri-d)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.legend i.lm{width:14px;height:3px;border-radius:2px;vertical-align:3px}
+.legend i.ld{width:6px;height:6px;border-radius:50%;vertical-align:1px}
+.legend i.ll{width:14px;height:0;border-radius:0;vertical-align:3px;background:none}
+svg.chart{width:100%;height:auto;display:block}
+#chart{position:relative}
+.ctip{position:absolute;display:none;pointer-events:none;background:#0f172a;color:#fff;border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.45;box-shadow:0 6px 20px rgba(15,23,42,.25);white-space:nowrap;z-index:5}
+.ctip .tm{color:#cbd5e1}
+#chart [data-t]{cursor:pointer}
+#chart circle.dot.on-hover{r:5;fill:#475569;fill-opacity:1}
+#chart circle.mean.on-hover{r:7;fill:#2563eb}
+
+#chart rect.hz.on-hover{fill-opacity:.14}
+
+
+/* ---------- banner & toast ---------- */
+.banner{display:flex;gap:10px;align-items:center;background:var(--warn-50);border:1px solid var(--warn-100);color:#78350f;border-radius:var(--r);padding:10px 14px;font-size:13.5px;margin-bottom:16px}
+.banner .sp{flex:1}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 24px rgba(15,23,42,.25);opacity:0;pointer-events:none;transition:all .25s;max-width:90vw;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--bad)}
+.errline{color:var(--bad);font-size:13px;font-weight:600;margin-top:8px}
+.vsum{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:600px){.brand p{display:none}.topbar-in{padding:10px 14px 0}main{padding:16px 14px 80px}.banner{flex-wrap:wrap}.card-h,.card-b{padding-left:14px;padding-right:14px}.hero .v{font-size:30px}.set-h .field{flex:1}}
+
+.lang{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;margin-left:8px;flex:none}
+.lang button{border:0;background:#fff;padding:5px 10px;font-size:12px;font-weight:600;color:var(--mute);cursor:pointer}
+.lang button+button{border-left:1px solid var(--line2)}
+.lang button[aria-pressed="true"]{background:var(--pri);color:#fff}
+@media(max-width:600px){#dataBadge{display:none}.lang button{padding:5px 8px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
+      <div><h1 data-i="brand.title"></h1><p data-i="brand.sub"></p></div>
+      <div class="sp"></div>
+      <span id="dataBadge" class="pill p-gray">Data</span>
+      <div class="lang" role="group" aria-label="Language"><button data-lang="id">ID</button><button data-lang="en">EN</button><button data-lang="zh">中文</button></div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-view="hasil"><span data-i="tab.hasil"></span></button>
+      <button class="tab" role="tab" data-view="data"><span data-i="tab.data"></span> <span class="count" id="cntData">0</span></button>
+      <button class="tab" role="tab" data-view="verifikasi"><span data-i="tab.ver"></span> <span class="count" id="cntVer">0</span></button>
+      <button class="tab" role="tab" data-view="pengaturan"><span data-i="tab.set"></span></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="banner" class="banner hidden">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span class="sp" data-ih="banner.txt"></span>
+    <button class="btn btn-sm" data-go="data" data-i="banner.btn"></button>
+  </div>
+
+  <!-- ================= HASIL ================= -->
+  <section class="view" id="v-hasil">
+    <div id="hasilEmpty" class="card hidden"><div class="empty"><b data-i="empty.title"></b><span data-i="empty.txt"></span><div style="margin-top:14px"><button class="btn btn-pri" data-go="data" data-i="empty.btn"></button></div></div></div>
+    <div id="hasilFull">
+      <div class="card">
+        <div class="card-h"><div><h2 data-i="chart.title"></h2></div><div class="sp"></div><div class="seg" id="zoomSeg"><button data-zoom="all" data-i="zoom.all"></button><button data-zoom="order" data-i="zoom.order"></button></div></div>
+        <div class="chart-model">
+          <div class="cm-chart">
+            <div id="chart"></div>
+          <div class="legend"><span><i class="lm" style="background:#2563eb"></i><span data-i="lg.mean"></span></span><span><i class="ld" style="background:#94a3b8"></i><span data-i="lg.pt"></span></span><span><i class="ll" style="border-top:2px dotted #cbd5e1"></i><span data-i="lg.ideal"></span></span><span><i class="ll" style="border-top:2px solid #7c3aed"></i><span data-i="lg.fit"></span></span><span><i style="background:rgba(22,163,74,.15)"></i><span data-i="lg.ok"></span></span><span><i style="background:rgba(37,99,235,.12)"></i><span data-i="lg.safe"></span></span></div>
+          </div>
+          <aside class="cm-model">
+            <h3 class="cm-t" data-i="model.title" style="margin-bottom:10px"></h3>
+            <div id="modelBox"></div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpis" style="margin-top:16px"></div>
+      <div class="grid-find">
+        <div class="card">
+          <div class="card-h"><div><h2 data-i="find.title"></h2><p class="desc" data-i="find.desc"></p></div></div>
+          <div class="card-b">
+            <div class="field"><label for="order" data-i="find.label"></label><div class="unit"><input id="order" class="inp inp-lg" type="number" step="1" inputmode="numeric" value="1900"></div></div>
+            <div id="orderBox"></div>
+          </div>
+        </div>
+      <div class="card tbl-card">
+        <div class="card-h"><div><h2 data-i="tbl.title"></h2><p class="desc" id="tblDesc"></p></div><div class="sp"></div><button class="btn btn-sm" id="btnCopy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i="btn.copy"></span></button></div>
+        <div class="tw tw-scroll"><table class="t" id="tblMain"></table></div>
+        <div class="card-f" id="tblFoot"></div>
+      </div>
+      </div>
+
+      <details class="card acc" style="margin-top:16px">
+        <summary><span data-i="sum.title"></span> <span class="desc" style="font-weight:400;color:var(--mute);font-size:12.5px" data-i="sum.desc"></span></summary>
+        <div class="tw"><table class="t" id="tblSum"></table></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ================= DATA ================= -->
+  <section class="view" id="v-data">
+    <div class="card">
+      <div class="card-h"><div><h2 data-i="sug.title"></h2><p class="desc" data-i="sug.desc"></p></div></div>
+      <div class="card-b"><div class="steps" id="sugBox"></div></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-h"><div><h2 data-i="data.title"></h2><p class="desc" data-i="data.desc"></p></div></div>
+      <div class="card-b" style="border-bottom:1px solid var(--line)">
+        <div class="toolbar">
+          <div class="field" style="flex:1;min-width:150px"><label for="newSp" data-i="f.newSp"></label><div class="unit"><input id="newSp" class="inp" type="number" step="1" inputmode="numeric" data-iph="ph.newSp"></div></div>
+          <div class="field" style="width:120px"><label for="newN" data-i="f.newN"></label><input id="newN" class="inp" type="number" min="1" max="50" value="8" inputmode="numeric"></div>
+          <button class="btn btn-pri" id="btnAddSp" style="height:38px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i="btn.addSp"></span></button>
+        </div>
+        <div id="msg" class="errline"></div>
+        <div class="toolbar" style="margin-top:10px">
+          <button class="btn btn-ghost btn-sm" id="btnImportToggle" data-i="btn.import"></button>
+          <button class="btn btn-ghost btn-sm" id="btnSample" data-i="btn.sample"></button>
+          <button class="btn btn-ghost btn-sm" id="btnOpenAll" data-i="btn.openAll"></button>
+          <button class="btn btn-ghost btn-sm" id="btnCloseAll" data-i="btn.closeAll"></button>
+          <div style="flex:1"></div>
+          <button class="btn btn-sm btn-danger" id="btnClear" data-i="btn.clear"></button>
+        </div>
+        <div id="importBox" class="hidden" style="margin-top:10px">
+          <textarea id="data" class="inp" data-iph="ph.import"></textarea>
+          <div class="toolbar" style="margin-top:8px">
+            <button class="btn btn-sm btn-pri" id="btnImport" data-i="btn.importGo"></button>
+            <label class="btn btn-sm" style="margin:0"><span data-i="btn.file"></span><input type="file" id="file" accept=".csv,.txt,.tsv" class="hidden"></label>
+          </div>
+        </div>
+      </div>
+      <div class="card-b">
+        <div id="grpBody" class="set-list"></div>
+        <div id="dataInfo" class="empty"><b data-i="data.emptyT"></b><span data-i="data.emptyX"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VERIFIKASI ================= -->
+  <section class="view" id="v-verifikasi">
+    <div class="card">
+      <div class="card-h"><div><h2 data-i="ver.title"></h2><p class="desc" data-i="ver.desc"></p></div><div class="sp"></div><button class="btn btn-pri btn-sm" id="btnAddVer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i="btn.addVer"></span></button></div>
+      <div class="card-b"><div class="vsum" id="verSum"></div><div id="verBody" class="set-list" style="margin-top:12px"></div></div>
+    </div>
+  </section>
+
+  <!-- ================= PENGATURAN ================= -->
+  <section class="view" id="v-pengaturan">
+    <div class="card">
+      <div class="card-h"><div><h2 data-i="set.rules"></h2><p class="desc" data-i="set.rulesD"></p></div></div>
+      <div class="card-b">
+        <div class="form-grid">
+          <div class="field"><label for="tolMin" data-i="f.tolMin"></label><div class="unit"><input id="tolMin" class="inp" type="number" step="any" min="0" value="0"></div><div class="help" data-i="h.tolMin"></div></div>
+          <div class="field"><label for="tolPlus" data-i="f.tolPlus"></label><div class="unit"><input id="tolPlus" class="inp" type="number" step="any" min="0" value="50"></div><div class="help" data-i="h.tolPlus"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-h"><div><h2 data-i="set.tbl"></h2><p class="desc" data-i="set.tblD"></p></div></div>
+      <div class="card-b">
+        <div class="form-grid">
+          <div class="field"><label for="rmin" data-i="f.rmin"></label><div class="unit"><input id="rmin" class="inp" type="number" step="1" value="1000"></div></div>
+          <div class="field"><label for="rmax" data-i="f.rmax"></label><div class="unit"><input id="rmax" class="inp" type="number" step="1" value="3000"></div></div>
+          <div class="field"><label for="rstep" data-i="f.rstep"></label><div class="unit"><input id="rstep" class="inp" type="number" step="1" min="1" value="50"></div><div class="help" data-i="h.rstep"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-h"><div><h2 data-i="set.method"></h2><p class="desc" data-i="set.methodD"></p></div></div>
+      <div class="card-b">
+        <div class="field" style="max-width:360px"><label for="mode" data-i="f.mode"></label><select id="mode" class="inp"><option value="auto" data-i="mode.auto"></option><option value="rumus" data-i="mode.rumus"></option><option value="interp" data-i="mode.interp"></option></select>
+        <div class="help" data-i="h.mode"></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script>
+/* ===== LOGIKA ===== */
+const num=v=>Number(String(v).trim().replace(',','.'));
+function parseData(txt){
+  const pts=[];let bad=0;
+  for(const raw of txt.split(/\r?\n/)){
+    const line=raw.trim();if(!line)continue;
+    const tok=(/[\t; ]/.test(line)?line.split(/[\t; ]+/):line.split(',')).filter(t=>t!=='');
+    const n=tok.map(num);
+    if(n.every(isNaN))continue;
+    if(n.some(isNaN)||n.length<2){bad++;continue;}
+    pts.push({sp:n[0],ac:n[n.length-1]});
+  }
+  return {pts,bad};
+}
+function cekNilai(v,sp){if(v===''||v==null)return 'empty';const x=num(v);if(!isFinite(x))return 'nan';if(sp>0&&Math.abs(x-sp)/sp>0.1)return 'far';return 'ok';}
+
+function stats(groups){
+  return groups.map(g=>{
+    const v=g.vals.filter(x=>{const s=cekNilai(x,g.sp);return s==='ok'||s==='far';}).map(num);
+    if(!v.length)return null;
+    const m=v.reduce((a,b)=>a+b,0)/v.length,mn=Math.min(...v),mx=Math.max(...v);
+    return {sp:g.sp,n:v.length,total:g.vals.length,vals:v,mean:m,min:mn,max:mx,range:mx-mn,sel:m-g.sp};
+  }).filter(Boolean).sort((a,b)=>a.sp-b.sp);
+}
+// interpolasi min/max hasil pada setting s (hanya di dalam rentang uji)
+function pred(S,s){
+  for(let i=0;i<S.length;i++){if(S[i].sp===s)return {min:S[i].min,max:S[i].max,tested:true,g:S[i]};}
+  for(let i=0;i<S.length-1;i++){const a=S[i],b=S[i+1];if(s>a.sp&&s<b.sp){const t=(s-a.sp)/(b.sp-a.sp);return {min:a.min+t*(b.min-a.min),max:a.max+t*(b.max-a.max),tested:false};}}
+  return null;
+}
+// cari rentang setting aman untuk pesanan P
+function fitLine(S){
+  const pts=[];S.forEach(g=>g.vals.forEach(v=>pts.push([g.sp,v])));
+  const n=pts.length,mx=pts.reduce((s,p)=>s+p[0],0)/n,my=pts.reduce((s,p)=>s+p[1],0)/n;
+  let sxx=0,sxy=0,syy=0;pts.forEach(([x,y])=>{sxx+=(x-mx)**2;sxy+=(x-mx)*(y-my);syy+=(y-my)**2;});
+  const b=sxx?sxy/sxx:1,a=my-b*mx,r2=syy?(sxy*sxy)/(sxx*syy):1;
+  const res=pts.map(([x,y])=>y-(a+b*x));
+  const maxDev=Math.max(...S.map(g=>Math.abs(g.mean-(a+b*g.sp))));
+  return {a,b,r2,rMin:Math.min(...res),rMax:Math.max(...res),maxDev,n};
+}
+const LURUS_MAKS=5; // mm: penyimpangan rata-rata per setting dari garis
+function makeModel(S,mode,rmin,rmax){
+  const fit=S.length>=2?fitLine(S):null;
+  const lurus=!!fit&&S.length>=3&&fit.maxDev<=LURUS_MAKS;
+  const use=mode==='rumus'?'rumus':mode==='interp'?'interp':(lurus?'rumus':'interp');
+  const tested=new Set(S.map(x=>x.sp));
+  if(use==='rumus'&&fit){
+    const lo=Math.min(S[0].sp,Math.round((rmin-fit.a)/fit.b))-100,hi=Math.max(S[S.length-1].sp,Math.round((rmax-fit.a)/fit.b))+100;
+    return {use,fit,lurus,s0:lo,s1:hi,f:s=>{const m=fit.a+fit.b*s;return {min:m+fit.rMin,max:m+fit.rMax,tested:tested.has(s)};}};
+  }
+  return {use:'interp',fit,lurus,s0:Math.ceil(S[0].sp),s1:Math.floor(S[S.length-1].sp),f:s=>pred(S,s)};
+}
+function safeRange(S,P,tolMin,tolPlus,M){
+  if(S.length<1)return {segs:[],out:true};
+  const lo=P-tolMin,hi=P+tolPlus,s0=M.s0,s1=M.s1;
+  const segs=[];let cur=null;
+  for(let s=s0;s<=s1;s++){
+    const p=M.f(s);const ok=p&&p.min>=lo-1e-9&&p.max<=hi+1e-9;
+    if(ok){if(!cur)cur={a:s,b:s,tested:[]};cur.b=s;if(p.tested)cur.tested.push(s);}
+    else if(cur){segs.push(cur);cur=null;}
+  }
+  if(cur)segs.push(cur);
+  segs.forEach(sg=>{sg.mid=Math.round((sg.a+sg.b)/2);sg.endsTested=S.some(x=>x.sp===sg.a)&&S.some(x=>x.sp===sg.b);sg.inData=sg.a>=S[0].sp&&sg.b<=S[S.length-1].sp;});
+  // apakah pesanan di luar jangkauan data
+  const minRes=Math.min(...S.map(x=>x.min)),maxRes=Math.max(...S.map(x=>x.max));
+  return {segs,lo,hi,out:!segs.length&&(hi<minRes||lo>maxRes)};
+}
+function suggestions(S,rmin,rmax,lookupRows){
+  const tested=new Set(S.map(x=>x.sp));const t1=[],t2=new Set(),t3=new Set();
+  for(let i=0;i<S.length-1;i++){
+    const a=S[i],b=S[i+1],jump=Math.abs(b.sel-a.sel),gap=b.sp-a.sp;
+    if(jump<=5)continue;
+    if(gap>10){for(let s=Math.ceil((a.sp+1)/10)*10;s<b.sp;s+=10)if(!tested.has(s))t2.add(s);}
+    else if(gap>1){const m=Math.round((a.sp+b.sp)/2);if(!tested.has(m))t3.add(m);}
+  }
+  lookupRows.forEach(r=>r.res.segs.forEach(sg=>{[sg.a,sg.b].forEach(e=>{if(!tested.has(e))t3.add(e);});}));
+  t2.forEach(s=>t3.delete(s));
+  return {t1,t2:[...t2].sort((a,b)=>a-b),t3:[...t3].sort((a,b)=>a-b)};
+}
+</script>
+<script>
+/* ===== BAHASA ===== */
+const I18N={
+id:{
+ 'brand.title':'Kalibrasi Mesin Potong','brand.sub':'Pemetaan setting komputer → hasil potongan kabel · satuan mm',
+ 'tab.hasil':'Hasil','tab.data':'Data Percobaan','tab.ver':'Verifikasi','tab.set':'Pengaturan',
+ 'badge.sample':'Contoh data','badge.user':'Data Anda',
+ 'banner.txt':'Yang tampil adalah <b>contoh data</b> (simulasi). Hapus dan isi dengan data percobaan Anda.','banner.btn':'Ke Data Percobaan',
+ 'empty.title':'Belum cukup data','empty.txt':'Isi minimal 2 setting yang sudah ada hasil ukurnya untuk melihat tabel setting.','empty.btn':'Mulai isi data percobaan',
+ 'find.title':'Cari setting untuk pesanan','find.desc':'Masukkan panjang kabel yang dipesan','find.label':'Panjang pesanan',
+ 'model.title':'Model mesin',
+ 'tbl.title':'Tabel estimasi potongan kabel','btn.copy':'Salin ke Excel',
+ 'tbl.foot':'{ok} kedua batas rentang sudah diuji · {part} / {est} batas dihitung dari model, perlu diuji · {need} belum ada data',
+ 'chart.title':'Grafik hasil potongan',
+ 'lg.pt':'Tiap potongan','lg.mean':'Rata-rata','lg.ideal':'Hasil = setting','lg.fit':'Garis rumus','lg.ok':'Hasil diterima','lg.safe':'Setting aman',
+ 'zoom.all':'Semua data','zoom.order':'Sekitar pesanan','sum.title':'Ringkasan per setting','sum.desc':'rata-rata, min, maks, variasi',
+ 'sug.title':'Saran percobaan berikutnya','sug.desc':'Ikuti tahap 1 → 2 → 3. Klik angka untuk menambahkan setting (8 potongan).',
+ 'data.title':'Data percobaan','data.desc':'Isi hasil ukur tiap potongan. Tekan Enter untuk pindah ke kolom berikutnya.',
+ 'f.newSp':'Setting komputer','ph.newSp':'mis. 1800','f.newN':'Jumlah potongan','btn.addSp':'Tambah setting',
+ 'btn.import':'Impor dari Excel/CSV','btn.sample':'Isi contoh data','btn.openAll':'Buka semua','btn.closeAll':'Tutup semua','btn.clear':'Hapus semua data','btn.clearArm':'Klik lagi untuk menghapus',
+ 'ph.import':'Tempel 2 kolom dari Excel: setting  hasil','btn.importGo':'Masukkan ke kolom isian','btn.file':'Pilih file CSV',
+ 'data.emptyT':'Belum ada data percobaan','data.emptyX':'Mulai dari Tahap 1 di atas, atau tambah setting secara manual.',
+ 'ver.title':'Verifikasi setting','ver.desc':'Potong 8 pcs di setting yang dipakai, lalu isi hasilnya. LULUS jika semua masuk rentang pesanan.','btn.addVer':'Verifikasi baru',
+ 'ver.emptyT':'Belum ada verifikasi','ver.emptyX':'Klik <b>Verifikasi baru</b>, atau tombol "Verifikasi setting ini" di tab Hasil.',
+ 'ver.order':'Pesanan','ver.setting':'Setting dipakai','ver.date':'Tanggal',
+ 'set.rules':'Aturan pesanan','set.rulesD':'Batas hasil potong yang diterima untuk setiap pesanan',
+ 'f.tolMin':'Boleh kurang','h.tolMin':'0 = tidak boleh lebih pendek dari pesanan','f.tolPlus':'Boleh lebih','h.tolPlus':'Pesanan 1900 → diterima 1900–1950',
+ 'set.tbl':'Tabel estimasi','set.tblD':'Rentang panjang pesanan yang ditampilkan di tabel',
+ 'f.rmin':'Pesanan dari','f.rmax':'Pesanan sampai','f.rstep':'Jarak antar baris','h.rstep':'50 → baris 1700, 1750, 1800, …',
+ 'set.method':'Metode perhitungan','set.methodD':'Cara web memperkirakan hasil di antara setting yang diuji','f.mode':'Metode',
+ 'mode.auto':'Otomatis (disarankan)','mode.rumus':'Rumus garis lurus','mode.interp':'Interpolasi antar titik',
+ 'h.mode':'Otomatis: pakai rumus jika data lurus (penyimpangan ≤ 5 mm), selain itu interpolasi.',
+ 'lab.setting':'SETTING','cell':'Potongan {n}','btn.addCell':'+ potongan','t.delSet':'Hapus setting','t.delCell':'Hapus potongan {n}',
+ 'k.filled':'{n}/{t} terisi','k.check':'{b} perlu dicek',
+ 'kpi.tested':'Setting diuji','kpi.total':'Total potongan','kpi.totalS':'hasil ukur terisi','kpi.method':'Metode','kpi.var':'Variasi terbesar','kpi.varS':'maks − min dalam 1 setting',
+ 'm.rumus':'Rumus','m.interp':'Interpolasi','m.lurus':'data lurus','m.tidak':'data tidak lurus',
+ 'hero.put':'Pasang setting komputer','hero.saran':'Saran','hero.acc':'Hasil diterima {a}–{b} mm',
+ 'b.ok':'Teruji','b.part':'Sebagian teruji','b.est':'Perkiraan','b.need':'Perlu percobaan',
+ 'n.outData':'Rentang ini di luar setting yang pernah diuji (perpanjangan rumus). Wajib diuji dulu.',
+ 'n.ends':'Batas rentang belum diuji langsung. Uji setting <b>{a}</b> dan <b>{b}</b> (8 potongan).',
+ 'n.other':'Rentang lain yang juga aman: {r}','btn.verThis':'Verifikasi setting ini →',
+ 'hero.badHead':'Pesanan {p} mm · hasil diterima {a}–{b} mm','hero.none':'Belum ada setting yang aman',
+ 'n.out':'Pesanan di luar jangkauan data. Tambah percobaan di sekitar setting {p} mm.',
+ 'n.noSafe':'Tidak ada setting yang semua potongannya masuk {a}–{b} mm. Perapat percobaan di sekitar pesanan ini, atau cek variasi mesin.',
+ 'n.fillOrder':'Isi panjang pesanan.',
+ 'md.straight':'Kelurusan','md.few':'Data kurang (min. 3 setting)','md.lurus':'Data lurus','md.tidak':'Tidak lurus',
+ 'md.dev':'Penyimpangan maks','md.limit':'(batas {l} mm)','md.used':'Metode dipakai','md.auto':'otomatis','md.manual':'manual',
+ 'md.noteR':'Setting = (pesanan + {h} {a}) / {b}. Angka +{h} mengarahkan hasil ke tengah toleransi.',
+ 'md.noteI':'Data tidak lurus (kemungkinan ada loncatan/tangga), jadi setting dihitung dengan interpolasi antar titik uji.',
+ 'md.forced':'Rumus dipaksa padahal data tidak lurus. Hasil di sekitar titik loncatan bisa salah.',
+ 'eq.res':'Hasil','eq.set':'Setting','eq.setting':'setting',
+ 'tbl.desc':'Pesanan {a}–{b} mm · hasil diterima −{m} / +{p} mm',
+ 'th.set':'Setting di Komputer (mm)','th.res':'Hasil Potongan (mm)','th.sug':'Saran','th.status':'Status',
+ 'ts.set':'Setting','ts.n':'Terisi','ts.mean':'Rata-rata','ts.min':'Min','ts.max':'Maks','ts.sel':'Selisih','ts.var':'Variasi',
+ 'v.ok':'stabil','v.mid':'sedang','v.bad':'besar',
+ 'st.no':'Tahap {n}','st1.t':'Pemetaan kasar','st1.d':'Setting per 50 mm di seluruh rentang pesanan.','st1.p':'({d}/{t} selesai)','st1.done':'Semua titik per 50 mm sudah ada','st1.rec':'Rekomendasi','st1.nInc':'{n} setting belum lengkap','st1.dMan0':'Mengikuti setting yang Anda tambahkan di Data percobaan. Belum ada setting — tambahkan lewat kolom Setting komputer di bawah.','st1.man':'Manual','st1.dMan':'Mengikuti setting di Data percobaan: {d}/{n} setting lengkap (8 potongan). Klik angka untuk mengisi yang belum lengkap.','st1.doneMan':'Semua {n} setting manual sudah lengkap',
+ 'st2.t':'Perapatan','st2.d':'Per 10 mm di area yang hasilnya meloncat.','st2.done':'Tidak ada loncatan yang perlu dirapatkan',
+ 'st3.t':'Batas presisi','st3.d':'Per mm di titik loncatan dan batas rentang tabel.','st3.done':'Semua batas sudah diuji',
+ 'st.n':'{n} setting disarankan','st.wait1':'Menunggu data Tahap 1','st.wait':'Menunggu data','st.add':'Tambahkan {n} setting','st.more':'+{n} lagi',
+ 'ax.x':'Setting komputer (mm)','ax.y':'Hasil potongan (mm)',
+ 'tip.safe':'Rentang setting aman','tip.for':'untuk pesanan {p} mm','tip.acc':'Hasil diterima pesanan','tip.ideal':'Garis ideal','tip.fit':'Garis rumus',
+ 'tip.set':'Setting {s} mm','tip.mean':'Rata-rata','tip.var':'Variasi {v} mm · {n} potongan','tip.line':'Garis rata-rata','tip.chg':'Perubahan {d} mm untuk {s} mm setting',
+ 'tip.cut':'Potongan','tip.diff':'Selisih {d} mm dari setting',
+ 'vs.nan':'Isian bukan angka','vs.fail':'GAGAL','vs.failX':'{o} dari {n} di luar {a}–{b}','vs.part':'{n}/{t} terisi','vs.pass':'LULUS','vs.passX':'semua masuk {a}–{b}',
+ 'vs.sumL':'{n} lulus','vs.sumG':'{n} gagal','vs.sumB':'{n} belum lengkap',
+ 'toast.delSet':'Setting {s} dihapus','toast.delCell':'Potongan {n} di setting {s} dihapus','toast.noData':'Tidak ada data yang terbaca',
+ 'toast.imported':'{n} data dimasukkan','toast.skipped':', {n} baris dilewati','toast.cleared':'Semua data percobaan dihapus','toast.sample':'Contoh data dimuat',
+ 'toast.added':'{n} setting ditambahkan — isi hasil ukurnya','toast.copied':'Tabel tersalin — tempel di Excel','toast.copyFail':'Gagal menyalin','toast.delVer':'Verifikasi dihapus',
+ 'err.sp':'Isi setting komputer dulu.','err.dup':'Setting {s} sudah ada.','err.nan':'{n} kolom berisi bukan angka (merah). Kolom tersebut tidak dihitung.',
+ 'err.range':'Rentang pesanan tidak valid (Pengaturan).','err.rows':'Baris tabel terlalu banyak. Perbesar jarak antar baris (Pengaturan).',
+ 'x.range':'{a} – {b} mm'
+},
+en:{
+ 'brand.title':'Cutting Machine Calibration','brand.sub':'Mapping computer setting → cable cut result · unit mm',
+ 'tab.hasil':'Results','tab.data':'Trial Data','tab.ver':'Verification','tab.set':'Settings',
+ 'badge.sample':'Sample data','badge.user':'Your data',
+ 'banner.txt':'You are viewing <b>sample data</b> (simulation). Clear it and enter your own trial data.','banner.btn':'Go to Trial Data',
+ 'empty.title':'Not enough data','empty.txt':'Enter at least 2 settings with measured results to see the setting table.','empty.btn':'Start entering trial data',
+ 'find.title':'Find setting for an order','find.desc':'Enter the ordered cable length','find.label':'Order length',
+ 'model.title':'Machine model',
+ 'tbl.title':'Cable cut estimation table','btn.copy':'Copy to Excel',
+ 'tbl.foot':'{ok} both range limits tested · {part} / {est} limits calculated from the model, need testing · {need} no data yet',
+ 'chart.title':'Cut result chart',
+ 'lg.pt':'Each cut','lg.mean':'Average','lg.ideal':'Result = setting','lg.fit':'Formula line','lg.ok':'Accepted result','lg.safe':'Safe setting',
+ 'zoom.all':'All data','zoom.order':'Around order','sum.title':'Summary per setting','sum.desc':'average, min, max, variation',
+ 'sug.title':'Next trial suggestions','sug.desc':'Follow stage 1 → 2 → 3. Click a number to add that setting (8 cuts).',
+ 'data.title':'Trial data','data.desc':'Enter the measured result of each cut. Press Enter to move to the next field.',
+ 'f.newSp':'Computer setting','ph.newSp':'e.g. 1800','f.newN':'Number of cuts','btn.addSp':'Add setting',
+ 'btn.import':'Import from Excel/CSV','btn.sample':'Load sample data','btn.openAll':'Expand all','btn.closeAll':'Collapse all','btn.clear':'Clear all data','btn.clearArm':'Click again to clear',
+ 'ph.import':'Paste 2 columns from Excel: setting  result','btn.importGo':'Put into input fields','btn.file':'Choose CSV file',
+ 'data.emptyT':'No trial data yet','data.emptyX':'Start with Stage 1 above, or add a setting manually.',
+ 'ver.title':'Setting verification','ver.desc':'Cut 8 pcs at the setting used, then enter the results. PASS if all fall within the order range.','btn.addVer':'New verification',
+ 'ver.emptyT':'No verification yet','ver.emptyX':'Click <b>New verification</b>, or the "Verify this setting" button on the Results tab.',
+ 'ver.order':'Order','ver.setting':'Setting used','ver.date':'Date',
+ 'set.rules':'Order rules','set.rulesD':'Accepted cut result limits for each order',
+ 'f.tolMin':'Allowed shorter','h.tolMin':'0 = must not be shorter than the order','f.tolPlus':'Allowed longer','h.tolPlus':'Order 1900 → accepted 1900–1950',
+ 'set.tbl':'Estimation table','set.tblD':'Range of order lengths shown in the table',
+ 'f.rmin':'Order from','f.rmax':'Order to','f.rstep':'Row interval','h.rstep':'50 → rows 1700, 1750, 1800, …',
+ 'set.method':'Calculation method','set.methodD':'How the app estimates results between tested settings','f.mode':'Method',
+ 'mode.auto':'Automatic (recommended)','mode.rumus':'Straight-line formula','mode.interp':'Interpolation between points',
+ 'h.mode':'Automatic: use the formula if data is straight (deviation ≤ 5 mm), otherwise interpolation.',
+ 'lab.setting':'SETTING','cell':'Cut {n}','btn.addCell':'+ cut','t.delSet':'Delete setting','t.delCell':'Delete cut {n}',
+ 'k.filled':'{n}/{t} filled','k.check':'{b} to check',
+ 'kpi.tested':'Settings tested','kpi.total':'Total cuts','kpi.totalS':'measured results','kpi.method':'Method','kpi.var':'Largest variation','kpi.varS':'max − min within 1 setting',
+ 'm.rumus':'Formula','m.interp':'Interpolation','m.lurus':'straight data','m.tidak':'non-straight data',
+ 'hero.put':'Set the computer to','hero.saran':'Suggested','hero.acc':'Accepted result {a}–{b} mm',
+ 'b.ok':'Tested','b.part':'Partly tested','b.est':'Estimated','b.need':'Needs trial',
+ 'n.outData':'This range is outside the tested settings (formula extrapolation). It must be tested first.',
+ 'n.ends':'Range limits not directly tested yet. Test settings <b>{a}</b> and <b>{b}</b> (8 cuts).',
+ 'n.other':'Other safe ranges: {r}','btn.verThis':'Verify this setting →',
+ 'hero.badHead':'Order {p} mm · accepted result {a}–{b} mm','hero.none':'No safe setting yet',
+ 'n.out':'The order is outside the data range. Add trials around setting {p} mm.',
+ 'n.noSafe':'No setting has all cuts within {a}–{b} mm. Add denser trials around this order, or check machine variation.',
+ 'n.fillOrder':'Enter the order length.',
+ 'md.straight':'Linearity','md.few':'Not enough data (min. 3 settings)','md.lurus':'Straight','md.tidak':'Not straight',
+ 'md.dev':'Max deviation','md.limit':'(limit {l} mm)','md.used':'Method used','md.auto':'automatic','md.manual':'manual',
+ 'md.noteR':'Setting = (order + {h} {a}) / {b}. The +{h} aims the result at the middle of the tolerance.',
+ 'md.noteI':'Data is not straight (likely steps/jumps), so the setting is calculated by interpolating between tested points.',
+ 'md.forced':'Formula forced although data is not straight. Results near jump points may be wrong.',
+ 'eq.res':'Result','eq.set':'Setting','eq.setting':'setting',
+ 'tbl.desc':'Order {a}–{b} mm · accepted result −{m} / +{p} mm',
+ 'th.set':'Computer Setting (mm)','th.res':'Cut Result (mm)','th.sug':'Suggested','th.status':'Status',
+ 'ts.set':'Setting','ts.n':'Filled','ts.mean':'Average','ts.min':'Min','ts.max':'Max','ts.sel':'Difference','ts.var':'Variation',
+ 'v.ok':'stable','v.mid':'medium','v.bad':'large',
+ 'st.no':'Stage {n}','st1.t':'Coarse mapping','st1.d':'Settings every 50 mm across the order range.','st1.p':'({d}/{t} done)','st1.done':'All 50 mm points are present','st1.rec':'Recommended','st1.nInc':'{n} settings incomplete','st1.dMan0':'Follows the settings you add in Trial data. No settings yet — add them with the Computer setting field below.','st1.man':'Manual','st1.dMan':'Follows the settings in Trial data: {d}/{n} complete (8 cuts). Click a number to fill an incomplete one.','st1.doneMan':'All {n} manual settings are complete',
+ 'st2.t':'Refinement','st2.d':'Every 10 mm in areas where the result jumps.','st2.done':'No jumps to refine',
+ 'st3.t':'Precise limits','st3.d':'Every 1 mm at jump points and table range limits.','st3.done':'All limits tested',
+ 'st.n':'{n} settings suggested','st.wait1':'Waiting for Stage 1 data','st.wait':'Waiting for data','st.add':'Add {n} settings','st.more':'+{n} more',
+ 'ax.x':'Computer setting (mm)','ax.y':'Cut result (mm)',
+ 'tip.safe':'Safe setting range','tip.for':'for order {p} mm','tip.acc':'Accepted order result','tip.ideal':'Ideal line','tip.fit':'Formula line',
+ 'tip.set':'Setting {s} mm','tip.mean':'Average','tip.var':'Variation {v} mm · {n} cuts','tip.line':'Average line','tip.chg':'Change {d} mm per {s} mm setting',
+ 'tip.cut':'Cut','tip.diff':'Difference {d} mm from setting',
+ 'vs.nan':'Non-numeric input','vs.fail':'FAIL','vs.failX':'{o} of {n} outside {a}–{b}','vs.part':'{n}/{t} filled','vs.pass':'PASS','vs.passX':'all within {a}–{b}',
+ 'vs.sumL':'{n} passed','vs.sumG':'{n} failed','vs.sumB':'{n} incomplete',
+ 'toast.delSet':'Setting {s} deleted','toast.delCell':'Cut {n} of setting {s} deleted','toast.noData':'No readable data',
+ 'toast.imported':'{n} values imported','toast.skipped':', {n} rows skipped','toast.cleared':'All trial data cleared','toast.sample':'Sample data loaded',
+ 'toast.added':'{n} settings added — enter the measured results','toast.copied':'Table copied — paste into Excel','toast.copyFail':'Copy failed','toast.delVer':'Verification deleted',
+ 'err.sp':'Enter the computer setting first.','err.dup':'Setting {s} already exists.','err.nan':'{n} fields are not numbers (red). They are not counted.',
+ 'err.range':'Invalid order range (Settings).','err.rows':'Too many table rows. Increase the row interval (Settings).',
+ 'x.range':'{a} – {b} mm'
+},
+zh:{
+ 'brand.title':'裁切机校准','brand.sub':'电脑设定值 → 线缆裁切结果对照 · 单位 mm',
+ 'tab.hasil':'结果','tab.data':'试验数据','tab.ver':'验证','tab.set':'设置',
+ 'badge.sample':'示例数据','badge.user':'您的数据',
+ 'banner.txt':'当前显示的是<b>示例数据</b>（模拟）。请清除后输入您的试验数据。','banner.btn':'前往试验数据',
+ 'empty.title':'数据不足','empty.txt':'请至少输入 2 个已有测量结果的设定值，才能查看设定对照表。','empty.btn':'开始输入试验数据',
+ 'find.title':'查找订单设定值','find.desc':'输入订单线缆长度','find.label':'订单长度',
+ 'model.title':'机器模型',
+ 'tbl.title':'线缆裁切估算表','btn.copy':'复制到 Excel',
+ 'tbl.foot':'{ok} 范围两端均已测试 · {part} / {est} 范围端点由模型计算，需测试 · {need} 尚无数据',
+ 'chart.title':'裁切结果图',
+ 'lg.pt':'每次裁切','lg.mean':'平均值','lg.ideal':'结果 = 设定值','lg.fit':'公式线','lg.ok':'可接受结果','lg.safe':'安全设定',
+ 'zoom.all':'全部数据','zoom.order':'订单附近','sum.title':'各设定值汇总','sum.desc':'平均值、最小值、最大值、波动',
+ 'sug.title':'下一步试验建议','sug.desc':'按阶段 1 → 2 → 3 进行。点击数字即可添加该设定值（8 次裁切）。',
+ 'data.title':'试验数据','data.desc':'输入每次裁切的测量结果。按 Enter 跳到下一格。',
+ 'f.newSp':'电脑设定值','ph.newSp':'例如 1800','f.newN':'裁切次数','btn.addSp':'添加设定值',
+ 'btn.import':'从 Excel/CSV 导入','btn.sample':'载入示例数据','btn.openAll':'全部展开','btn.closeAll':'全部收起','btn.clear':'清除全部数据','btn.clearArm':'再次点击以清除',
+ 'ph.import':'从 Excel 粘贴 2 列：设定值  结果','btn.importGo':'填入输入格','btn.file':'选择 CSV 文件',
+ 'data.emptyT':'尚无试验数据','data.emptyX':'从上方阶段 1 开始，或手动添加设定值。',
+ 'ver.title':'设定值验证','ver.desc':'在所用设定值下裁切 8 根，然后输入结果。全部在订单范围内即为合格。','btn.addVer':'新建验证',
+ 'ver.emptyT':'尚无验证','ver.emptyX':'点击<b>新建验证</b>，或在结果页点击“验证此设定”。',
+ 'ver.order':'订单','ver.setting':'所用设定值','ver.date':'日期',
+ 'set.rules':'订单规则','set.rulesD':'每个订单可接受的裁切结果范围',
+ 'f.tolMin':'允许偏短','h.tolMin':'0 = 不得短于订单长度','f.tolPlus':'允许偏长','h.tolPlus':'订单 1900 → 可接受 1900–1950',
+ 'set.tbl':'估算表','set.tblD':'表中显示的订单长度范围',
+ 'f.rmin':'订单起始','f.rmax':'订单结束','f.rstep':'行间隔','h.rstep':'50 → 行 1700、1750、1800 …',
+ 'set.method':'计算方法','set.methodD':'如何估算已测设定值之间的结果','f.mode':'方法',
+ 'mode.auto':'自动（推荐）','mode.rumus':'直线公式','mode.interp':'点间插值',
+ 'h.mode':'自动：数据呈直线（偏差 ≤ 5 mm）时用公式，否则用插值。',
+ 'lab.setting':'设定值','cell':'第 {n} 根','btn.addCell':'+ 裁切','t.delSet':'删除设定值','t.delCell':'删除第 {n} 根',
+ 'k.filled':'已填 {n}/{t}','k.check':'{b} 个需检查',
+ 'kpi.tested':'已测设定值','kpi.total':'裁切总数','kpi.totalS':'已填测量结果','kpi.method':'方法','kpi.var':'最大波动','kpi.varS':'同一设定值内 最大−最小',
+ 'm.rumus':'公式','m.interp':'插值','m.lurus':'数据呈直线','m.tidak':'数据非直线',
+ 'hero.put':'电脑设定值','hero.saran':'建议','hero.acc':'可接受结果 {a}–{b} mm',
+ 'b.ok':'已测试','b.part':'部分测试','b.est':'估算','b.need':'需试验',
+ 'n.outData':'此范围超出已测设定值（公式外推），必须先测试。',
+ 'n.ends':'范围端点尚未直接测试。请测试设定值 <b>{a}</b> 和 <b>{b}</b>（各 8 根）。',
+ 'n.other':'其他安全范围：{r}','btn.verThis':'验证此设定 →',
+ 'hero.badHead':'订单 {p} mm · 可接受结果 {a}–{b} mm','hero.none':'暂无安全设定值',
+ 'n.out':'订单超出数据范围。请在设定值 {p} mm 附近增加试验。',
+ 'n.noSafe':'没有任何设定值的全部裁切都在 {a}–{b} mm 内。请在此订单附近加密试验，或检查机器波动。',
+ 'n.fillOrder':'请输入订单长度。',
+ 'md.straight':'线性','md.few':'数据不足（至少 3 个设定值）','md.lurus':'直线','md.tidak':'非直线',
+ 'md.dev':'最大偏差','md.limit':'（上限 {l} mm）','md.used':'所用方法','md.auto':'自动','md.manual':'手动',
+ 'md.noteR':'设定值 = (订单 + {h} {a}) / {b}。+{h} 使结果落在公差中间。',
+ 'md.noteI':'数据非直线（可能存在台阶/跳变），因此设定值按已测点之间插值计算。',
+ 'md.forced':'数据非直线却强制使用公式。跳变点附近的结果可能有误。',
+ 'eq.res':'结果','eq.set':'设定值','eq.setting':'设定值',
+ 'tbl.desc':'订单 {a}–{b} mm · 可接受结果 −{m} / +{p} mm',
+ 'th.set':'电脑设定值 (mm)','th.res':'裁切结果 (mm)','th.sug':'建议','th.status':'状态',
+ 'ts.set':'设定值','ts.n':'已填','ts.mean':'平均值','ts.min':'最小','ts.max':'最大','ts.sel':'差值','ts.var':'波动',
+ 'v.ok':'稳定','v.mid':'中等','v.bad':'较大',
+ 'st.no':'阶段 {n}','st1.t':'粗略映射','st1.d':'在订单范围内每 50 mm 一个设定值。','st1.p':'（已完成 {d}/{t}）','st1.done':'每 50 mm 的点已齐全','st1.rec':'推荐','st1.nInc':'{n} 个设定值未完成','st1.dMan0':'按您在试验数据中添加的设定值进行。尚无设定值 — 请在下方“电脑设定值”中添加。','st1.man':'手动','st1.dMan':'按试验数据中的设定值：已完成 {d}/{n}（8 根）。点击数字填写未完成的设定值。','st1.doneMan':'{n} 个手动设定值均已完成',
+ 'st2.t':'加密','st2.d':'在结果跳变区域每 10 mm 一个。','st2.done':'没有需要加密的跳变',
+ 'st3.t':'精确边界','st3.d':'在跳变点和表格范围端点每 1 mm 一个。','st3.done':'所有边界均已测试',
+ 'st.n':'建议 {n} 个设定值','st.wait1':'等待阶段 1 数据','st.wait':'等待数据','st.add':'添加 {n} 个设定值','st.more':'另有 {n} 个',
+ 'ax.x':'电脑设定值 (mm)','ax.y':'裁切结果 (mm)',
+ 'tip.safe':'安全设定范围','tip.for':'适用于订单 {p} mm','tip.acc':'订单可接受结果','tip.ideal':'理想线','tip.fit':'公式线',
+ 'tip.set':'设定值 {s} mm','tip.mean':'平均值','tip.var':'波动 {v} mm · {n} 根','tip.line':'平均值连线','tip.chg':'设定值变化 {s} mm，结果变化 {d} mm',
+ 'tip.cut':'裁切','tip.diff':'与设定值相差 {d} mm',
+ 'vs.nan':'输入不是数字','vs.fail':'不合格','vs.failX':'{n} 根中 {o} 根超出 {a}–{b}','vs.part':'已填 {n}/{t}','vs.pass':'合格','vs.passX':'全部在 {a}–{b} 内',
+ 'vs.sumL':'{n} 合格','vs.sumG':'{n} 不合格','vs.sumB':'{n} 未完成',
+ 'toast.delSet':'已删除设定值 {s}','toast.delCell':'已删除设定值 {s} 的第 {n} 根','toast.noData':'没有可读取的数据',
+ 'toast.imported':'已导入 {n} 个数据','toast.skipped':'，跳过 {n} 行','toast.cleared':'已清除全部试验数据','toast.sample':'已载入示例数据',
+ 'toast.added':'已添加 {n} 个设定值 — 请填写测量结果','toast.copied':'表格已复制 — 可粘贴到 Excel','toast.copyFail':'复制失败','toast.delVer':'已删除验证',
+ 'err.sp':'请先输入电脑设定值。','err.dup':'设定值 {s} 已存在。','err.nan':'{n} 个格子不是数字（红色），不计入计算。',
+ 'err.range':'订单范围无效（设置）。','err.rows':'表格行数过多。请增大行间隔（设置）。',
+ 'x.range':'{a} – {b} mm'
+}};
+let LANG='id';
+try{const sv=localStorage.getItem('kmp_lang');if(sv&&I18N[sv])LANG=sv;}catch(e){}
+function t(k,v){let s=(I18N[LANG]&&I18N[LANG][k])??I18N.id[k]??k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s;}
+const LOC={id:'id-ID',en:'en-US',zh:'zh-CN'};
+function applyStatic(){
+  document.documentElement.lang=LANG==='zh'?'zh-CN':LANG;
+  document.querySelectorAll('[data-i]').forEach(e=>{e.textContent=t(e.dataset.i);});
+  document.querySelectorAll('[data-ih]').forEach(e=>{e.innerHTML=t(e.dataset.ih);});
+  document.querySelectorAll('[data-iph]').forEach(e=>{e.placeholder=t(e.dataset.iph);});
+  document.title=t('brand.title');
+  document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG?'true':'false'));
+}
+
+
+/* ===== TAMPILAN ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(v,d=1)=>isFinite(v)?v.toLocaleString(LOC[LANG],{maximumFractionDigits:d,useGrouping:false}):'-';
+const sgn=(v,d=1)=>(v>0?'+':'')+fmt(v,d);
+const mn=a=>a<0?'+ '+fmt(-a,2):'− '+fmt(a,2);
+const ICON_WARN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+const ICON_INFO='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+const ICON_X='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+const note=(t,kind='warn')=>`<div class="note ${kind}">${kind==='warn'?ICON_WARN:ICON_INFO}<div>${t}</div></div>`;
+let GROUPS=[],VERS=[],LAST={},isContoh=false,tAuto=null;
+
+/* --- toast --- */
+let tT=null;function toast(t,err){const el=$('toast');el.textContent=t;el.className='toast on'+(err?' err':'');clearTimeout(tT);tT=setTimeout(()=>el.className='toast'+(err?' err':''),2600);}
+
+/* --- tab --- */
+const VIEWS=['hasil','data','verifikasi','pengaturan'];
+function go(v){if(!VIEWS.includes(v))v='hasil';const bb=document.querySelector('#banner [data-go]');if(bb)bb.classList.toggle('hidden',v==='data');VIEWS.forEach(x=>$('v-'+x).classList.toggle('on',x===v));
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v?'true':'false'));
+  if(location.hash!=='#'+v){try{history.replaceState(null,'','#'+v);}catch(e){location.hash=v;}}window.scrollTo(0,0);if(v==='hasil')requestAnimationFrame(()=>{const w=$('chart').clientWidth;if(w&&Math.abs(w-lastW)>40){lastW=w;hitung();}scrollHl();});}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-view],[data-go]');if(!t)return;go(t.dataset.view||t.dataset.go);});
+window.addEventListener('hashchange',()=>go(location.hash.slice(1)));
+let rzT=null,lastW=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{const w=$('chart').clientWidth;if(w&&Math.abs(w-lastW)>40){lastW=w;hitung();}},250);});
+
+/* --- data percobaan --- */
+const cls=s=>'inp '+({ok:'okv',far:'bad',nan:'bad',empty:''}[s]);
+let SET_OPEN={};
+function grpDone(g){const st=g.vals.map(v=>cekNilai(v,g.sp));return st.length>0&&st.every(s=>s==='ok');}
+function setOpen(g){return SET_OPEN[g.sp]!==undefined?SET_OPEN[g.sp]:!grpDone(g);}
+function drawGroups(focusId){
+  GROUPS.sort((a,b)=>a.sp-b.sp);
+  if(focusId){const m=/^c(\d+)_/.exec(focusId);if(m&&GROUPS[+m[1]])SET_OPEN[GROUPS[+m[1]].sp]=true;}
+  $('grpBody').innerHTML=GROUPS.map((g,gi)=>`<div class="set${setOpen(g)?' open':''}" id="set${gi}"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div class="set-h"><button type="button" class="tog" data-togs="${gi}" aria-label="toggle"><span class="chev"></span></button><span class="lab">${t('lab.setting')}</span><div class="unit"><input class="inp" data-g="${gi}" data-sp="1" type="number" step="1" inputmode="numeric" value="${g.sp}"></div><div class="prog"><div class="bar"><i id="gb${gi}"></i></div><span id="gk${gi}"></span><span class="gm" id="gm${gi}"></span></div><button class="btn btn-ghost btn-sm" data-addc="${gi}">${t('btn.addCell')}</button><button class="btn icon-btn" data-delg="${gi}" title="${t('t.delSet')}">${ICON_X}</button></div><div class="cells">${g.vals.map((v,ci)=>`<label class="cell"><span class="cl">${t('cell',{n:ci+1})}${g.vals.length>1?`<button type="button" class="cdel" data-delc="${gi}_${ci}" title="${t('t.delCell',{n:ci+1})}" aria-label="${t('t.delCell',{n:ci+1})}">×</button>`:''}</span><input id="c${gi}_${ci}" data-g="${gi}" data-c="${ci}" type="text" inputmode="decimal" autocomplete="off" value="${esc(v)}" class="${cls(cekNilai(v,g.sp))}"></label>`).join('')}</div></div>`).join('');
+  GROUPS.forEach((g,gi)=>updK(gi));
+  $('dataInfo').classList.toggle('hidden',GROUPS.length>0);$('cntData').textContent=GROUPS.length;
+  if(focusId&&$(focusId))$(focusId).focus();
+}
+function updK(gi){const g=GROUPS[gi],st=g.vals.map(v=>cekNilai(v,g.sp)),n=st.filter(s=>s==='ok'||s==='far').length,b=st.filter(s=>s!=='ok'&&s!=='empty').length;
+  const el=$('gk'+gi);if(el)el.innerHTML=t('k.filled',{n,t:g.vals.length})+(b?` · <b style="color:var(--bad)">${t('k.check',{b})}</b>`:'');
+  const se=$('set'+gi);if(se)se.classList.toggle('done',grpDone(g));
+  const gm=$('gm'+gi),vv=g.vals.filter(v=>String(v).trim()!=='').map(num).filter(isFinite);if(gm)gm.textContent=vv.length?`· ${t('ts.mean')} ${fmt(vv.reduce((a,b)=>a+b,0)/vv.length)} · ${fmt(Math.min(...vv))}–${fmt(Math.max(...vv))}`:'';
+  const br=$('gb'+gi);if(br){br.style.width=(100*n/Math.max(1,g.vals.length))+'%';br.style.background=b?'var(--bad)':n===g.vals.length?'var(--ok)':'var(--pri)';}}
+function addSetting(sp,n){sp=Math.round(sp);if(GROUPS.some(g=>g.sp===sp))return false;GROUPS.push({sp,vals:Array(n||8).fill('')});return true;}
+$('btnAddSp').onclick=()=>{
+  const sp=parseFloat($('newSp').value),n=Math.min(50,Math.max(1,parseInt($('newN').value)||8));
+  if(!(sp>0)){$('msg').textContent=t('err.sp');$('newSp').focus();return;}
+  if(!addSetting(sp,n)){$('msg').textContent=t('err.dup',{s:Math.round(sp)});return;}
+  $('msg').textContent='';drawGroups();const gi=GROUPS.findIndex(g=>g.sp===Math.round(sp));$('newSp').value='';$('c'+gi+'_0').focus();changed();
+};
+$('newSp').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('btnAddSp').click();}});
+$('grpBody').addEventListener('input',e=>{const t=e.target,gi=t.dataset.g;if(gi===undefined)return;const g=GROUPS[gi];SET_OPEN[g.sp]=true;
+  if(t.dataset.sp){const v=parseFloat(t.value);if(v>0)g.sp=Math.round(v);}else g.vals[t.dataset.c]=t.value.trim();
+  g.vals.forEach((v,ci)=>{const el=$('c'+gi+'_'+ci);if(el)el.className=cls(cekNilai(v,g.sp));});updK(gi);changed();});
+$('grpBody').addEventListener('change',e=>{if(e.target.dataset.sp)drawGroups();});
+$('grpBody').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const t=e.target;if(t.dataset.c===undefined)return;e.preventDefault();
+  const gi=+t.dataset.g,ci=+t.dataset.c,nx=$('c'+gi+'_'+(ci+1))||$('c'+(gi+1)+'_0');(nx||$('newSp')).focus();});
+$('grpBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.togs!==undefined){const g=GROUPS[d.togs],s=$('set'+d.togs),o=!s.classList.contains('open');s.classList.toggle('open',o);SET_OPEN[g.sp]=o;return;}
+  if(d.addc!==undefined){const g=GROUPS[d.addc];g.vals.push('');drawGroups('c'+d.addc+'_'+(g.vals.length-1));changed();}
+  if(d.delc!==undefined){const [gi,ci]=d.delc.split('_').map(Number);const g=GROUPS[gi];if(g.vals.length<=1)return;const v=g.vals[ci];g.vals.splice(ci,1);drawGroups();changed();toast(t('toast.delCell',{n:ci+1,s:g.sp})+(v?` (${v})`:''));return;}
+  if(d.delg!==undefined){const sp=GROUPS[d.delg].sp;GROUPS.splice(+d.delg,1);drawGroups();changed();toast(t('toast.delSet',{s:sp}));}});
+const allSet=o=>{GROUPS.forEach(g=>SET_OPEN[g.sp]=o);document.querySelectorAll('#grpBody .set').forEach(s=>s.classList.toggle('open',o));};
+$('btnOpenAll').onclick=()=>allSet(true);$('btnCloseAll').onclick=()=>allSet(false);
+$('btnImportToggle').onclick=()=>$('importBox').classList.toggle('hidden');
+$('btnImport').onclick=()=>{const {pts,bad}=parseData($('data').value);if(!pts.length){toast(t('toast.noData'),1);return;}
+  pts.forEach(p=>{const sp=Math.round(p.sp);let g=GROUPS.find(x=>x.sp===sp);if(!g){g={sp,vals:[]};GROUPS.push(g);}const i=g.vals.indexOf('');if(i>=0)g.vals[i]=String(p.ac);else g.vals.push(String(p.ac));});
+  $('data').value='';$('importBox').classList.add('hidden');drawGroups();changed();toast(t('toast.imported',{n:pts.length})+(bad?t('toast.skipped',{n:bad}):''));};
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('data').value=r.result;};r.readAsText(f);};
+let armT=null;
+$('btnClear').onclick=()=>{const b=$('btnClear');
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent=t('btn.clearArm');clearTimeout(armT);armT=setTimeout(()=>{b.classList.remove('arm');b.textContent=t('btn.clear');},3000);return;}
+  b.classList.remove('arm');b.textContent=t('btn.clear');GROUPS=[];isContoh=false;drawGroups();changed();toast(t('toast.cleared'));};
+$('btnSample').onclick=()=>{contoh();isContoh=true;setBanner();simpan();hitung();toast(t('toast.sample'));};
+
+/* --- saran --- */
+function renderSug(sug,S){
+  const tested=new Set(S.map(x=>x.sp));
+  const rmin=Math.round(+$('rmin').value),rmax=Math.round(+$('rmax').value);
+  // Tahap 1: rekomendasi (per 50 mm di rentang pesanan) atau manual (dari/sampai/jarak sendiri)
+  let grid=[],tot1=0,manDone=0;
+  if(T1.mode==='man'){grid=GROUPS.map(g=>g.sp).sort((a,b)=>a-b);tot1=grid.length;const inc=GROUPS.filter(g=>!grpDone(g)).map(g=>g.sp).sort((a,b)=>a-b);manDone=tot1-inc.length;sug=Object.assign({},sug,{t1:inc});}
+  else{for(let s=Math.ceil(rmin/50)*50;s<=rmax;s+=50)grid.push(s);tot1=grid.length;sug=Object.assign({},sug,{t1:grid.filter(s=>!tested.has(s))});}
+  const cur=sug.t1.length?1:sug.t2.length?2:sug.t3.length?3:0;
+  const chips=arr=>`<div class="chips">${arr.slice(0,40).map(s=>`<button class="chip" data-sug="${s}">${s}</button>`).join('')}${arr.length>40?`<span class="muted" style="font-size:12px">${t('st.more',{n:arr.length-40})}</span>`:''}</div>`;
+  const step=(no,title,desc,arr,key,doneTxt,waiting,extra)=>{const done=!arr.length&&!waiting;const open=STEP_OPEN[no]!==undefined?STEP_OPEN[no]:(cur===no);
+    return `<div class="step${cur===no?' cur':''}${done?' done':''}${open?' open':''}" data-step="${no}"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <button type="button" class="step-h" data-tog="${no}" aria-expanded="${open}"><div class="tx"><div class="no">${t('st.no',{n:no})}</div><h3>${title}</h3><div class="st">${arr.length?`<span class="cnt">${key?t('st.n',{n:arr.length}):t('st1.nInc',{n:arr.length})}</span>`:(done?'✓ ':'')+doneTxt}</div></div><span class="chev"></span></button>
+      <div class="step-b">${extra||''}<p>${desc}</p>${arr.length?chips(arr)+(key?`<button class="btn btn-sm${cur===no?' btn-pri':''}" data-all="${key}">${t('st.add',{n:arr.length})}</button>`:''):''}</div></div>`;};
+  $('sugBox').innerHTML=
+    step(1,t('st1.t'),(T1.mode==='man'?(tot1?t('st1.dMan',{n:tot1,d:manDone}):t('st1.dMan0')):t('st1.d')+(tot1?' '+t('st1.p',{d:tot1-sug.t1.length,t:tot1}):'')),sug.t1,T1.mode==='man'?'':'t1',T1.mode==='man'?t('st1.doneMan',{n:tot1}):t('st1.done'),T1.mode==='man'&&!tot1,
+      `<div class="seg t1seg" style="margin-bottom:8px"><button data-t1mode="rec" aria-pressed="${T1.mode!=='man'}">${t('st1.rec')}</button><button data-t1mode="man" aria-pressed="${T1.mode==='man'}">${t('st1.man')}</button></div>`)+
+    step(2,t('st2.t'),t('st2.d'),sug.t2,'t2',S.length<2?t('st.wait1'):t('st2.done'),S.length<2)+
+    step(3,t('st3.t'),t('st3.d'),sug.t3,'t3',S.length<2?t('st.wait'):t('st3.done'),S.length<2);
+  LAST.sug=sug;
+}
+let STEP_OPEN={};
+let T1={mode:'rec'};try{const j=JSON.parse(localStorage.getItem('kmp_t1')||'null');if(j&&j.mode)T1=j;}catch(e){}
+const saveT1=()=>{try{localStorage.setItem('kmp_t1',JSON.stringify(T1));}catch(e){}};
+
+$('sugBox').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;let add=[];
+  if(d.t1mode){T1.mode=d.t1mode;saveT1();STEP_OPEN[1]=true;hitung();return;}
+  if(d.tog){const s=b.closest('.step');const o=!s.classList.contains('open');s.classList.toggle('open',o);b.setAttribute('aria-expanded',o);STEP_OPEN[d.tog]=o;return;}
+  if(d.sug)add=[+d.sug];if(d.all&&LAST.sug)add=LAST.sug[d.all];if(!add.length)return;
+  let n=0;add.forEach(s=>{if(addSetting(s,8))n++;});add.forEach(s=>SET_OPEN[s]=true);if(!n){drawGroups();const gi=GROUPS.findIndex(g=>g.sp===add[0]);const c=gi>=0&&(GROUPS[gi].vals.findIndex(v=>v==='')>=0?GROUPS[gi].vals.findIndex(v=>v===''):0);const el=gi>=0&&$('c'+gi+'_'+c);if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.focus({preventScroll:true});}return;}
+  isContoh=false;drawGroups();changed();
+  toast(t('toast.added',{n}));const gi=GROUPS.findIndex(g=>g.sp===add[0]);
+  if(gi>=0&&$('c'+gi+'_0')){$('c'+gi+'_0').scrollIntoView({block:'center',behavior:'smooth'});$('c'+gi+'_0').focus({preventScroll:true});}});
+
+/* --- grafik --- */
+function niceTicks(lo,hi,n){if(lo===hi){lo-=1;hi+=1}const s0=(hi-lo)/n,m=Math.pow(10,Math.floor(Math.log10(s0))),r=s0/m,st=(r<1.5?1:r<3?2:r<7?5:10)*m;const t=[];for(let v=Math.floor(lo/st)*st;v<=Math.ceil(hi/st)*st+st/2;v+=st)t.push(+v.toFixed(10));return t;}
+let TIPS=[],CHART_ZOOM='all';
+function setZoom(z){CHART_ZOOM=z;try{localStorage.setItem('kmp_zoom',z);}catch(e){}document.querySelectorAll('#zoomSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.zoom===z?'true':'false'));if(LAST&&LAST.S&&LAST.S.length>=2)drawChart(LAST.S,LAST.r||{segs:[],lo:NaN,hi:NaN},LAST.M);}
+$('zoomSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setZoom(b.dataset.zoom);});
+try{const z=localStorage.getItem('kmp_zoom');if(z==='order'||z==='all')CHART_ZOOM=z;}catch(e){}
+document.querySelectorAll('#zoomSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.zoom===CHART_ZOOM?'true':'false'));
+function tip(html){TIPS.push(html);return ` data-t="${TIPS.length-1}"`;}
+function drawChart(S,res,M){
+  TIPS=[];
+  const cw=($('chart').clientWidth||1080),W=Math.round(Math.max(440,Math.min(1080,cw))),H=W<700?360:420,m={l:52,r:16,t:40,b:50};
+  // rentang sumbu: rapat ke data (atau fokus di sekitar pesanan)
+  const sgB=res.segs&&res.segs.length?res.segs.reduce((a,b)=>(b.b-b.a>a.b-a.a?b:a)):null;
+  let xa=Math.min(...S.map(x=>x.sp)),xb=Math.max(...S.map(x=>x.sp));
+  if(CHART_ZOOM==='order'&&LAST.P>0){const c=sgB?sgB.mid:LAST.P,hw=Math.max(150,sgB?(sgB.b-sgB.a):0);xa=Math.max(xa,c-hw);xb=Math.min(xb,c+hw);if(xb-xa<40){xa=c-hw;xb=c+hw;}}
+  const xpad=Math.max(5,(xb-xa)*.03);const x0=xa-xpad,x1=xb+xpad;
+  const SV=S.filter(x=>x.sp>=x0&&x.sp<=x1);const ys=[];(SV.length?SV:S).forEach(x=>{ys.push(x.min,x.max);});if(isFinite(res.lo))ys.push(res.lo,res.hi);
+  const ya=Math.min(...ys),yb=Math.max(...ys),ypad=Math.max(3,(yb-ya)*.06);const y0=ya-ypad,y1=yb+ypad;
+  const xt=niceTicks(x0,x1,W<700?5:8).filter(v=>v>=x0&&v<=x1),yt=niceTicks(y0,y1,5).filter(v=>v>=y0&&v<=y1);
+  const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+  const P=LAST.P,PW=W-m.l-m.r,PH=H-m.t-m.b;
+  const C={ink:'#0f172a',mute:'#94a3b8',grid:'#f1f5f9',pri:'#2563eb',ok:'#16a34a',vio:'#7c3aed'};
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Inter,system-ui,sans-serif" font-size="11.5"><defs><clipPath id="cp"><rect x="${m.l}" y="${m.t}" width="${PW}" height="${PH}"/></clipPath>
+    <linearGradient id="gArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.pri}" stop-opacity=".12"/><stop offset="1" stop-color="${C.pri}" stop-opacity="0"/></linearGradient></defs>`;
+  // grid (horizontal only)
+  yt.forEach(v=>{s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.grid}" stroke-width="1" pointer-events="none"/><text x="${m.l-10}" y="${Y(v)+4}" text-anchor="end" fill="${C.mute}">${fmt(v,0)}</text>`;});
+  xt.forEach(v=>{s+=`<text x="${X(v)}" y="${H-m.b+20}" text-anchor="middle" fill="${C.mute}">${fmt(v,0)}</text>`;});
+  s+=`<g clip-path="url(#cp)">`;
+  // bands
+  if(isFinite(res.lo)){const yA=Y(res.hi),yB=Y(res.lo);
+    s+=`<rect class="hz" x="${m.l}" y="${yA}" width="${PW}" height="${Math.max(1,yB-yA)}" fill="${C.ok}" fill-opacity=".07"${tip(`<b>${t('tip.acc')}</b><br>${fmt(res.lo,0)} – ${fmt(res.hi,0)} mm`)}/>`;
+    s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${yA}" y2="${yA}" stroke="${C.ok}" stroke-opacity=".45" stroke-dasharray="3 4" pointer-events="none"/><line x1="${m.l}" x2="${W-m.r}" y1="${yB}" y2="${yB}" stroke="${C.ok}" stroke-opacity=".45" stroke-dasharray="3 4" pointer-events="none"/>`;}
+  res.segs.forEach(sg=>{s+=`<rect class="hz" x="${X(sg.a)}" y="${m.t}" width="${Math.max(2,X(sg.b)-X(sg.a))}" height="${PH}" fill="${C.pri}" fill-opacity=".07"${tip(`<b>${t('tip.safe')}</b><br>${rangeTxt(sg)} mm<br>${t('hero.saran')}: ${fmt(sg.mid,0)} mm${P?`<br><span class="tm">${t('tip.for',{p:fmt(P,0)})}</span>`:''}`)}/>`;});
+  // ideal + formula
+  const ia=Math.max(x0,y0),ib=Math.min(x1,y1);
+  s+=`<line x1="${X(ia)}" y1="${Y(ia)}" x2="${X(ib)}" y2="${Y(ib)}" stroke="#cbd5e1" stroke-dasharray="2 5" stroke-linecap="round" stroke-width="1.5" pointer-events="none"/>`;
+  s+=`<line class="hit" x1="${X(ia)}" y1="${Y(ia)}" x2="${X(ib)}" y2="${Y(ib)}" stroke="transparent" stroke-width="10"${tip(`<b>${t('tip.ideal')}</b><br>${t('lg.ideal')}`)}/>`;
+  if(M&&M.use==='rumus'&&M.fit){const f=M.fit;
+    s+=`<line x1="${X(x0)}" y1="${Y(f.a+f.b*x0)}" x2="${X(x1)}" y2="${Y(f.a+f.b*x1)}" stroke="${C.vio}" stroke-width="1.5" stroke-opacity=".7" pointer-events="none"/>`;
+    s+=`<line class="hit" x1="${X(x0)}" y1="${Y(f.a+f.b*x0)}" x2="${X(x1)}" y2="${Y(f.a+f.b*x1)}" stroke="transparent" stroke-width="12"${tip(`<b>${t('tip.fit')}</b><br>${eqTxt(f)}<br>R² ${fmt(f.r2,4)}`)}/>`;}
+  // area under mean + mean line
+  const iA=Math.max(0,S.findIndex(x=>x.sp>=x0)-1),iB=(()=>{let k=S.length-1;for(let i=0;i<S.length;i++)if(S[i].sp>x1){k=i;break;}return k;})();const SL=S.slice(iA,iB+1);
+  const pts=SL.map(x=>[X(x.sp),Y(x.mean)]);
+  s+=`<path d="M${pts[0][0]},${Y(y0)} ${pts.map(p=>'L'+p[0]+','+p[1]).join(' ')} L${pts[pts.length-1][0]},${Y(y0)} Z" fill="url(#gArea)" pointer-events="none"/>`;
+  s+=`<polyline fill="none" stroke="${C.pri}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p.join(',')).join(' ')}" pointer-events="none"/>`;
+  s+=`</g>`;
+  // per setting
+  s+=`<g clip-path="url(#cp)">`;
+  SL.forEach((x,i)=>{const S=SL;const sum=`<b>${t('tip.set',{s:fmt(x.sp,0)})}</b><br>${t('tip.mean')}: ${fmt(x.mean)} mm (${sgn(x.sel)})<br>${t('ts.min')} ${fmt(x.min)} · ${t('ts.max')} ${fmt(x.max)}<br>${t('tip.var',{v:fmt(x.range),n:x.n})}`;
+    if(i<S.length-1){const nx=S[i+1];s+=`<line class="hit" x1="${X(x.sp)}" y1="${Y(x.mean)}" x2="${X(nx.sp)}" y2="${Y(nx.mean)}" stroke="transparent" stroke-width="10"${tip(`<b>${t('tip.line')}</b><br>${t('ts.set')} ${fmt(x.sp,0)} → ${fmt(x.mean)} mm<br>${t('ts.set')} ${fmt(nx.sp,0)} → ${fmt(nx.mean)} mm<br><span class="tm">${t('tip.chg',{d:sgn(nx.mean-x.mean),s:fmt(nx.sp-x.sp,0)})}</span>`)}/>`;}
+    if(x.range>0)s+=`<line x1="${X(x.sp)}" x2="${X(x.sp)}" y1="${Y(x.min)}" y2="${Y(x.max)}" stroke="${C.pri}" stroke-opacity=".25" stroke-width="3" stroke-linecap="round" pointer-events="none"/>`;
+    x.vals.forEach(v=>{s+=`<circle class="pt dot" cx="${X(x.sp)}" cy="${Y(v)}" r="2" fill="${C.mute}" fill-opacity=".55"${tip(`<b>${t('tip.set',{s:fmt(x.sp,0)})}</b><br>${t('tip.cut')}: ${fmt(v)} mm<br><span class="tm">${t('tip.diff',{d:sgn(v-x.sp)})}</span>`)}/>`;});
+    s+=`<circle class="pt mean" cx="${X(x.sp)}" cy="${Y(x.mean)}" r="${S.length>25?3:4}" fill="#fff" stroke="${C.pri}" stroke-width="2"${tip(sum)}/>`;});
+  s+=`</g>`;
+  // suggested marker
+  const sg=res.segs&&res.segs.length?res.segs.reduce((a,b)=>(b.b-b.a>a.b-a.a?b:a)):null;
+  if(sg&&sg.mid>=x0&&sg.mid<=x1){const sx=X(sg.mid);const lbl=`${t('hero.saran')} ${fmt(sg.mid,0)}`;const lw=lbl.length*6.6+16;
+    s+=`<line x1="${sx}" x2="${sx}" y1="${m.t}" y2="${H-m.b}" stroke="${C.pri}" stroke-width="1" stroke-dasharray="2 3" pointer-events="none"/>`;
+    s+=`<g pointer-events="none"><rect x="${Math.min(W-m.r-lw,Math.max(m.l,sx-lw/2))}" y="${m.t-26}" width="${lw}" height="20" rx="10" fill="${C.pri}"/><text x="${Math.min(W-m.r-lw,Math.max(m.l,sx-lw/2))+lw/2}" y="${m.t-12}" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">${lbl}</text></g>`;}
+  s+=`<text x="${W-m.r}" y="${H-4}" text-anchor="end" fill="${C.mute}" font-size="11" font-weight="500">${t('ax.x')} →</text><text x="4" y="14" text-anchor="start" fill="${C.mute}" font-size="11" font-weight="500">↑ ${t('ax.y')}</text></svg>`;
+  $('chart').innerHTML=s+'<div id="ctip" class="ctip"></div>';
+}
+(function(){
+  const box=$('chart');
+  const show=(el,cx,cy)=>{const t=$('ctip');if(!t)return;t.innerHTML=TIPS[+el.dataset.t];t.style.display='block';
+    const r=box.getBoundingClientRect(),tw=t.offsetWidth,th=t.offsetHeight;let x=cx-r.left+14,y=cy-r.top-th-12;
+    if(x+tw>r.width)x=cx-r.left-tw-14;if(x<0)x=4;if(y<0)y=cy-r.top+16;t.style.left=x+'px';t.style.top=y+'px';
+    box.querySelectorAll('.on-hover').forEach(e=>e.classList.remove('on-hover'));el.classList.add('on-hover');};
+  const hide=()=>{const t=$('ctip');if(t)t.style.display='none';box.querySelectorAll('.on-hover').forEach(e=>e.classList.remove('on-hover'));};
+  box.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const el=e.target.closest('[data-t]');if(el)show(el,e.clientX,e.clientY);else hide();});
+  box.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')hide();});
+  box.addEventListener('click',e=>{const el=e.target.closest('[data-t]');if(el)show(el,e.clientX,e.clientY);else hide();});
+})();
+
+/* --- render hasil --- */
+const best=segs=>segs.length?segs.reduce((a,b)=>(b.b-b.a>a.b-a.a?b:a)):null;
+function rangeTxt(sg){return sg.a===sg.b?fmt(sg.a,0):fmt(sg.a,0)+' ~ '+fmt(sg.b,0);}
+function basis(sg){return sg.tested.length?(sg.endsTested?['ok',t('b.ok')]:['warn',t('b.part')]):['warn',t('b.est')];}
+const eqTxt=f=>`${t('eq.res')} = ${fmt(f.b,5)} × ${t('eq.set')} ${f.a<0?'− '+fmt(-f.a,2):'+ '+fmt(f.a,2)}`;
+const pill=(k,t)=>`<span class="pill p-${k}">${t}</span>`;
+function render(){
+  const S=stats(GROUPS),tolMin=+$('tolMin').value||0,tolPlus=+$('tolPlus').value||0;
+  const rmin=Math.round(+$('rmin').value),rmax=Math.round(+$('rmax').value),rstep=Math.max(1,Math.round(+$('rstep').value||50));
+  if(!(rmax>=rmin))throw new Error(t('err.range'));
+  if((rmax-rmin)/rstep>200)throw new Error(t('err.rows'));
+  const full=S.length>=2;
+  $('hasilEmpty').classList.toggle('hidden',full);$('hasilFull').classList.toggle('hidden',!full);
+  LAST={S};
+  if(!full){renderSug(suggestions(S,rmin,rmax,[]),S);return;}
+  const P=Math.round(+$('order').value);
+  const M=makeModel(S,$('mode').value,rmin,rmax);Object.assign(LAST,{M,P,tolMin,tolPlus});
+  const tgtMid=t=>t+(tolPlus-tolMin)/2;
+
+  // KPI
+  const totPot=S.reduce((s,x)=>s+x.n,0),maxVar=Math.max(...S.map(x=>x.range));
+  $('kpis').innerHTML=[
+    [t('kpi.tested'),S.length,t('x.range',{a:fmt(S[0].sp,0),b:fmt(S[S.length-1].sp,0)})],
+    [t('kpi.total'),totPot,t('kpi.totalS')],
+    [t('kpi.method'),M.use==='rumus'?t('m.rumus'):t('m.interp'),M.lurus?t('m.lurus'):t('m.tidak')],
+    [t('kpi.var'),fmt(maxVar)+' mm',t('kpi.varS')]
+  ].map(k=>`<div class="kpi"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
+
+  // cari pesanan
+  if(P>0){
+    const r=safeRange(S,P,tolMin,tolPlus,M);LAST.r=r;const sg=best(r.segs);
+    let h='';
+    if(sg){const [bk,bt]=basis(sg);
+      h=`<div class="hero"><div class="l">${t('hero.put')}</div><div class="v">${rangeTxt(sg)} <small>mm</small></div>
+        <div class="meta"><span>${t('hero.saran')}: <b>${fmt(sg.mid,0)} mm</b></span><span>${t('hero.acc',{a:fmt(r.lo,0),b:fmt(r.hi,0)})}</span>${pill(bk,bt)}</div></div>`;
+      if(M.use==='rumus')h+=`<div class="formula">${t('eq.setting')} = (${fmt(tgtMid(P),1)} ${mn(M.fit.a)}) / ${fmt(M.fit.b,5)} = <b>${fmt((tgtMid(P)-M.fit.a)/M.fit.b,1)}</b></div>`;
+      if(!sg.inData)h+=note(t('n.outData'));
+      else if(!sg.endsTested)h+=note(t('n.ends',{a:fmt(sg.a,0),b:fmt(sg.b,0)}));
+      if(r.segs.length>1)h+=note(t('n.other',{r:r.segs.filter(x=>x!==sg).map(rangeTxt).join(', ')}),'info');
+      h+=`<div style="margin-top:12px"><button class="btn btn-sm" id="btnVerThis">${t('btn.verThis')}</button></div>`;
+    }else{
+      h=`<div class="hero bad"><div class="l">${t('hero.badHead',{p:fmt(P,0),a:fmt(r.lo,0),b:fmt(r.hi,0)})}</div><div class="v">${t('hero.none')}</div></div>`;
+      h+=note(r.out?t('n.out',{p:fmt(P,0)}):t('n.noSafe',{a:fmt(r.lo,0),b:fmt(r.hi,0)}));
+    }
+    $('orderBox').innerHTML=h;
+    const bv=$('btnVerThis');if(bv)bv.onclick=()=>{addVer(P,sg.mid);go('verifikasi');};
+  }else{$('orderBox').innerHTML=note(t('n.fillOrder'),'info');LAST.r=null;}
+
+  // model
+  {const f=M.fit;
+    let mh=`<div class="formula">${eqTxt(f)}</div>`;
+    mh+=`<dl class="kv"><dt>${t('md.straight')}</dt><dd>${S.length<3?pill('gray',t('md.few')):M.lurus?pill('ok',t('md.lurus')):pill('warn',t('md.tidak'))}</dd>`;
+    mh+=`<dt>${t('md.dev')}</dt><dd>${fmt(f.maxDev,1)} mm <span class="muted" style="color:var(--mute);font-weight:400">${t('md.limit',{l:LURUS_MAKS})}</span></dd>`;
+    mh+=`<dt>R²</dt><dd>${fmt(f.r2,4)}</dd><dt>${t('md.used')}</dt><dd>${M.use==='rumus'?t('mode.rumus'):t('mode.interp')} <span style="color:var(--mute);font-weight:400">· ${$('mode').value==='auto'?t('md.auto'):t('md.manual')}</span></dd></dl>`;
+    if(M.use==='rumus')mh+=note(t('md.noteR',{h:fmt((tolPlus-tolMin)/2,1),a:mn(f.a),b:fmt(f.b,5)}),'info');
+    else if(S.length>=3)mh+=note(t('md.noteI'),'info');
+    if($('mode').value==='rumus'&&!M.lurus&&S.length>=3)mh+=note(t('md.forced'));
+    $('modelBox').innerHTML=mh;}
+
+  // tabel utama
+  const rows=[];for(let p=rmin;p<=rmax;p+=rstep)rows.push({p,res:safeRange(S,p,tolMin,tolPlus,M)});LAST.rows=rows;
+  $('tblDesc').textContent=t('tbl.desc',{a:fmt(rmin,0),b:fmt(rmax,0),m:fmt(tolMin,0),p:fmt(tolPlus,0)});
+  $('tblFoot').innerHTML=t('tbl.foot',{ok:pill('ok',t('b.ok')),part:pill('warn',t('b.part')),est:pill('warn',t('b.est')),need:pill('gray',t('b.need'))});
+  $('tblMain').innerHTML=`<thead><tr><th>${t('th.set')}</th><th>${t('th.res')}</th><th class="num">${t('th.sug')}</th><th>${t('th.status')}</th></tr></thead><tbody>`+rows.map(r=>{
+    const sg=best(r.res.segs);const b=sg?basis(sg):['gray',t('b.need')];
+    return `<tr${r.p===P?' class="hl"':''}><td class="strong">${sg?rangeTxt(sg):'<span class="muted">—</span>'}</td><td>${fmt(r.p,0)}</td><td class="num">${sg?fmt(sg.mid,0):'<span class="muted">—</span>'}</td><td>${pill(b[0],b[1])}</td></tr>`;}).join('')+'</tbody>';
+
+  scrollHl();
+  renderSug(suggestions(S,rmin,rmax,rows),S);
+  drawChart(S,LAST.r||{segs:[],lo:NaN,hi:NaN},M);
+
+  $('tblSum').innerHTML=`<thead><tr><th class="num">${t('ts.set')}</th><th class="num">${t('ts.n')}</th><th class="num">${t('ts.mean')}</th><th class="num">${t('ts.min')}</th><th class="num">${t('ts.max')}</th><th class="num">${t('ts.sel')}</th><th class="num">${t('ts.var')}</th><th></th></tr></thead><tbody>`+S.map(x=>{
+    const vt=x.range<=2?['ok',t('v.ok')]:x.range<=5?['warn',t('v.mid')]:['bad',t('v.bad')];
+    return `<tr><td class="num strong">${fmt(x.sp,0)}</td><td class="num">${x.n}/${x.total}</td><td class="num">${fmt(x.mean)}</td><td class="num">${fmt(x.min)}</td><td class="num">${fmt(x.max)}</td><td class="num">${sgn(x.sel)}</td><td class="num">${fmt(x.range)}</td><td>${pill(vt[0],vt[1])}</td></tr>`;}).join('')+'</tbody>';
+}
+function scrollHl(){const hl=document.querySelector('#tblMain tr.hl'),sc=hl&&hl.closest('.tw-scroll');if(sc&&sc.clientHeight){const d=hl.getBoundingClientRect().top-sc.getBoundingClientRect().top;sc.scrollTop=Math.max(0,sc.scrollTop+d-sc.clientHeight/2);}}
+function hitung(){
+  try{
+    const nan=GROUPS.reduce((s,g)=>s+g.vals.filter(v=>cekNilai(v,g.sp)==='nan').length,0);
+    $('msg').textContent=nan?t('err.nan',{n:nan}):'';
+    render();updVers();
+  }catch(e){toast(e.message,1);}
+}
+
+/* --- verifikasi --- */
+function addVer(p,sp){let tgl='';try{tgl=new Date().toISOString().slice(0,10);}catch(e){}
+  VERS.unshift({p:p||'',sp:sp||'',tgl,vals:Array(8).fill('')});drawVers();simpan();setTimeout(()=>{if($('v0_0'))$('v0_0').focus();},50);}
+function drawVers(){
+  $('verBody').innerHTML=VERS.length?VERS.map((v,vi)=>`<div class="set"><div class="set-h">
+    <div class="field" style="width:130px"><label>${t('ver.order')}</label><div class="unit"><input class="inp" data-v="${vi}" data-f="p" type="number" step="1" value="${v.p}"></div></div>
+    <div class="field" style="width:130px"><label>${t('ver.setting')}</label><div class="unit"><input class="inp" data-v="${vi}" data-f="sp" type="number" step="1" value="${v.sp}"></div></div>
+    <div class="field" style="width:150px"><label>${t('ver.date')}</label><input class="inp" data-v="${vi}" data-f="tgl" type="date" value="${esc(v.tgl||'')}"></div>
+    <div style="flex:1;align-self:flex-end;padding-bottom:6px" id="vk${vi}"></div>
+    <button class="btn icon-btn" data-delv="${vi}" title="${t('toast.delVer')}" style="align-self:flex-end">${ICON_X}</button></div>
+    <div class="cells">${v.vals.map((x,ci)=>`<label class="cell"><span>${t('cell',{n:ci+1})}</span><input id="v${vi}_${ci}" data-v="${vi}" data-c="${ci}" type="text" inputmode="decimal" autocomplete="off" value="${esc(x)}" class="inp"></label>`).join('')}</div></div>`).join('')
+    :`<div class="empty"><b>${t('ver.emptyT')}</b>${t('ver.emptyX')}</div>`;
+  $('cntVer').textContent=VERS.length;updVers();
+}
+function updVers(){
+  const tolMin=+$('tolMin').value||0,tolPlus=+$('tolPlus').value||0;let L=0,G=0,B=0;
+  VERS.forEach((v,vi)=>{const lo=v.p-tolMin,hi=v.p+tolPlus;let n=0,outN=0,nan=0;
+    v.vals.forEach((x,ci)=>{const el=$('v'+vi+'_'+ci);if(!el)return;let c='';
+      if(x!==''){const y=num(x);if(!isFinite(y)){nan++;c='bad';}else{n++;if(y<lo-1e-9||y>hi+1e-9){outN++;c='bad';}else c='okv';}}el.className='inp '+c;});
+    const k=$('vk'+vi);let st;
+    if(nan){st=pill('bad',t('vs.nan'));}
+    else if(outN){st=pill('bad',t('vs.fail'))+` <span style="font-size:12.5px;color:var(--mute)">${t('vs.failX',{o:outN,n,a:fmt(lo,0),b:fmt(hi,0)})}</span>`;G++;}
+    else if(n<v.vals.length){st=pill('gray',t('vs.part',{n,t:v.vals.length}));B++;}
+    else{st=pill('ok',t('vs.pass'))+` <span style="font-size:12.5px;color:var(--mute)">${t('vs.passX',{a:fmt(lo,0),b:fmt(hi,0)})}</span>`;L++;}
+    if(k)k.innerHTML=st;});
+  $('verSum').innerHTML=VERS.length?`${pill('ok',t('vs.sumL',{n:L}))} ${pill('bad',t('vs.sumG',{n:G}))} ${pill('gray',t('vs.sumB',{n:B}))}`:'';
+}
+$('btnAddVer').onclick=()=>{const P=Math.round(+$('order').value);const sg=LAST.r?best(LAST.r.segs):null;addVer(P,sg?sg.mid:'');};
+$('verBody').addEventListener('input',e=>{const t=e.target,vi=t.dataset.v;if(vi===undefined)return;const v=VERS[vi];
+  if(t.dataset.f){v[t.dataset.f]=t.dataset.f==='tgl'?t.value:Math.round(+t.value);}else v.vals[t.dataset.c]=t.value.trim();updVers();simpan();});
+$('verBody').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const t=e.target;if(t.dataset.c===undefined)return;e.preventDefault();const nx=$('v'+t.dataset.v+'_'+(+t.dataset.c+1));if(nx)nx.focus();});
+$('verBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.delv===undefined)return;VERS.splice(+b.dataset.delv,1);drawVers();simpan();toast(t('toast.delVer'));});
+
+/* --- salin --- */
+$('btnCopy').onclick=()=>{if(!LAST.rows)return;
+  const txt=[t('th.set'),t('th.res'),t('th.sug')+' (mm)',t('th.status')].join('\t')+'\n'+LAST.rows.map(r=>{const sg=best(r.res.segs);return [sg?rangeTxt(sg):'-',r.p,sg?sg.mid:'-',sg?basis(sg)[1]:t('b.need')].join('\t');}).join('\n');
+  try{navigator.clipboard.writeText(txt).then(()=>toast(t('toast.copied')),()=>toast(t('toast.copyFail'),1));}catch(e){toast(t('toast.copyFail'),1);}};
+
+/* --- simpan, contoh, auto --- */
+const FIELDS=['tolMin','tolPlus','rmin','rmax','rstep','order','mode'];
+function simpan(){try{localStorage.setItem('kmp3',JSON.stringify({g:GROUPS,v:VERS,c:isContoh,f:FIELDS.map(i=>$(i).value)}));}catch(e){}}
+function muat(){try{const j=JSON.parse(localStorage.getItem('kmp3')||localStorage.getItem('kmp2')||'null');if(!j)return false;if(Array.isArray(j.g))GROUPS=j.g;if(Array.isArray(j.v))VERS=j.v;isContoh=!!j.c;FIELDS.forEach((i,k)=>{if(j.f&&j.f[k]!=null&&j.f[k]!=='')$(i).value=j.f[k];});return true;}catch(e){return false;}}
+function contoh(){
+  let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  const mesin=s=>s<1770?s:Math.floor(s/50)*50+50;
+  GROUPS=[];for(let s=1000;s<=3000;s+=50){const v=[];for(let i=0;i<8;i++)v.push(String(Math.round((mesin(s)+rnd()*3)*2)/2));GROUPS.push({sp:s,vals:v});}
+  $('rmin').value=1000;$('rmax').value=3000;
+  drawGroups();
+}
+function setBanner(){$('banner').classList.toggle('hidden',!isContoh);const b=$('dataBadge');b.className='pill '+(isContoh?'p-warn':'p-ok');b.textContent=isContoh?t('badge.sample'):t('badge.user');}
+function changed(){isContoh=false;setBanner();simpan();clearTimeout(tAuto);tAuto=setTimeout(hitung,300);}
+FIELDS.forEach(id=>{$(id).addEventListener('input',()=>{simpan();clearTimeout(tAuto);tAuto=setTimeout(hitung,300);});$(id).addEventListener('change',()=>{simpan();hitung();});});
+if(!muat()||isContoh){contoh();isContoh=true;}
+function setLang(l){if(!I18N[l])return;LANG=l;try{localStorage.setItem('kmp_lang',l);}catch(e){}applyStatic();
+  const b=$('btnClear');b.classList.remove('arm');b.textContent=t('btn.clear');drawGroups();drawVers();setBanner();hitung();}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+applyStatic();drawGroups();drawVers();setBanner();hitung();go(location.hash.slice(1)||'hasil');
+</script>
+</body>
+</html>
