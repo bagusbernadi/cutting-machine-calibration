@@ -2,15 +2,15 @@
 
 Web app statis untuk memetakan **setting komputer mesin potong kabel → hasil potongan aktual**, lalu membuat tabel setting untuk setiap panjang pesanan (PO).
 
-Contoh hasil akhir:
+Contoh hasil akhir (disusun langsung dari data percobaan):
 
 | Setting di Komputer (mm) | Hasil Potongan (mm) |
 |---|---|
-| 1800 ~ 1847 | 1850 |
-| 1850 ~ 1897 | 1900 |
-| 1900 ~ 1947 | 1950 |
+| 1800 ~ 1840 | 1850 |
+| 1850 ~ 1890 | 1900 |
+| 1900 | 1950 |
 
-Jika ada pesanan kabel 1900 mm, operator cukup memasang setting di rentang **1850 ~ 1897 mm** (saran: nilai tengah).
+Jika ada pesanan kabel 1900 mm, operator memasang setting di rentang yang hasilnya masuk toleransi pesanan, misalnya **1850 ~ 1890 mm**.
 
 ![Tampilan tab Hasil](docs/hasil.png)
 
@@ -27,7 +27,11 @@ Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di
 - Panel **Model mesin**: rumus garis lurus `Hasil = b × Setting + a`, R², penyimpangan maksimum, dan keputusan apakah data lurus.
 - Ringkasan: jumlah setting diuji, total potongan, metode, variasi terbesar.
 - **Cari setting untuk pesanan**: masukkan panjang pesanan, lalu muncul rentang setting aman beserta saran nilai tengah.
-- **Tabel estimasi potongan kabel**: format setting → hasil, dengan status *Teruji / Sebagian teruji / Perkiraan / Perlu percobaan*, dan tombol **Salin ke Excel**.
+- **Tabel estimasi potongan kabel** disusun langsung dari data percobaan:
+  - Satu baris per setting yang diuji. Setting berurutan dengan hasil sama (selisih rata-rata ≤ 2 mm) digabung menjadi satu rentang, misalnya `1800 ~ 1840 → 1850`.
+  - Kolomnya: hasil potongan (rata-rata), rentang potongan (min–maks), dan jumlah setting/potongan yang diuji.
+  - Baris yang semua potongannya masuk toleransi pesanan yang sedang dicari diberi warna biru.
+  - Tombol **Salin ke Excel**.
 - Ringkasan per setting: rata-rata, min, maks, selisih, variasi.
 
 **Tab Data Percobaan**
@@ -49,7 +53,7 @@ Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di
 
 **Tab Pengaturan**
 - Toleransi pesanan: boleh kurang / boleh lebih (default 0 / +50 mm).
-- Rentang pesanan dan jarak antar baris tabel (default 1000–3000 mm, per 50 mm).
+- Rentang pemetaan untuk saran Tahap 1 Rekomendasi (default 1000–3000 mm, per 50 mm).
 - Metode perhitungan: *Otomatis* (disarankan), *Rumus garis lurus*, atau *Interpolasi antar titik*.
 
 **Umum**
@@ -75,9 +79,10 @@ Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di
 - **Interpolasi antar titik**: nilai min dan maks hasil di antara dua setting yang diuji diinterpolasi linear, lalu rentang aman dicari per 1 mm.
 - **Rumus garis lurus**: regresi linear dari semua potongan. Sebaran tiap potongan terhadap garis (residual min/maks) dipakai sebagai batas prediksi. Setting saran = `(P + tengah toleransi − a) / b`.
 - **Otomatis**: memakai rumus jika data lurus, yaitu rata-rata tiap setting menyimpang ≤ 5 mm dari garis dan ada minimal 3 setting. Selain itu memakai interpolasi.
-- Label status:
+- Label status pada hasil pencarian pesanan:
   - **Teruji**: kedua batas rentang sudah diuji langsung.
   - **Sebagian teruji** / **Perkiraan**: batas dihitung dari model dan perlu diuji (Tahap 3).
+- **Tabel estimasi** hanya berisi setting yang benar-benar diuji, tanpa interpolasi. Pengelompokan: setting berurutan digabung jika rata-rata hasilnya berbeda ≤ 2 mm.
 - Rentang hasil perpanjangan rumus di luar setting yang pernah diuji selalu diberi peringatan.
 
 ## Struktur repo

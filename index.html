@@ -369,7 +369,6 @@ svg.chart{width:100%;height:auto;display:block}
         <div class="form-grid">
           <div class="field"><label for="rmin" data-i="f.rmin"></label><div class="unit"><input id="rmin" class="inp" type="number" step="1" value="1000"></div></div>
           <div class="field"><label for="rmax" data-i="f.rmax"></label><div class="unit"><input id="rmax" class="inp" type="number" step="1" value="3000"></div></div>
-          <div class="field"><label for="rstep" data-i="f.rstep"></label><div class="unit"><input id="rstep" class="inp" type="number" step="1" min="1" value="50"></div><div class="help" data-i="h.rstep"></div></div>
         </div>
       </div>
     </div>
@@ -459,7 +458,7 @@ function suggestions(S,rmin,rmax,lookupRows){
     if(gap>10){for(let s=Math.ceil((a.sp+1)/10)*10;s<b.sp;s+=10)if(!tested.has(s))t2.add(s);}
     else if(gap>1){const m=Math.round((a.sp+b.sp)/2);if(!tested.has(m))t3.add(m);}
   }
-  lookupRows.forEach(r=>r.res.segs.forEach(sg=>{[sg.a,sg.b].forEach(e=>{if(!tested.has(e))t3.add(e);});}));
+  (lookupRows||[]).forEach(r=>r&&r.segs&&r.segs.forEach(sg=>{[sg.a,sg.b].forEach(e=>{if(!tested.has(e))t3.add(e);});}));
   t2.forEach(s=>t3.delete(s));
   return {t1,t2:[...t2].sort((a,b)=>a-b),t3:[...t3].sort((a,b)=>a-b)};
 }
@@ -476,7 +475,7 @@ id:{
  'find.title':'Cari setting untuk pesanan','find.desc':'Masukkan panjang kabel yang dipesan','find.label':'Panjang pesanan',
  'model.title':'Model mesin',
  'tbl.title':'Tabel estimasi potongan kabel','btn.copy':'Salin ke Excel',
- 'tbl.foot':'{ok} kedua batas rentang sudah diuji · {part} / {est} batas dihitung dari model, perlu diuji · {need} belum ada data',
+ 
  'chart.title':'Grafik hasil potongan',
  'lg.pt':'Tiap potongan','lg.mean':'Rata-rata','lg.ideal':'Hasil = setting','lg.fit':'Garis rumus','lg.ok':'Hasil diterima','lg.safe':'Setting aman',
  'zoom.all':'Semua data','zoom.order':'Sekitar pesanan','sum.title':'Ringkasan per setting','sum.desc':'rata-rata, min, maks, variasi',
@@ -491,8 +490,8 @@ id:{
  'ver.order':'Pesanan','ver.setting':'Setting dipakai','ver.date':'Tanggal',
  'set.rules':'Aturan pesanan','set.rulesD':'Batas hasil potong yang diterima untuk setiap pesanan',
  'f.tolMin':'Boleh kurang','h.tolMin':'0 = tidak boleh lebih pendek dari pesanan','f.tolPlus':'Boleh lebih','h.tolPlus':'Pesanan 1900 → diterima 1900–1950',
- 'set.tbl':'Tabel estimasi','set.tblD':'Rentang panjang pesanan yang ditampilkan di tabel',
- 'f.rmin':'Pesanan dari','f.rmax':'Pesanan sampai','f.rstep':'Jarak antar baris','h.rstep':'50 → baris 1700, 1750, 1800, …',
+ 'set.tbl':'Rentang pemetaan','set.tblD':'Rentang setting untuk saran Tahap 1 (Rekomendasi, per 50 mm)',
+ 'f.rmin':'Dari','f.rmax':'Sampai',
  'set.method':'Metode perhitungan','set.methodD':'Cara web memperkirakan hasil di antara setting yang diuji','f.mode':'Metode',
  'mode.auto':'Otomatis (disarankan)','mode.rumus':'Rumus garis lurus','mode.interp':'Interpolasi antar titik',
  'h.mode':'Otomatis: pakai rumus jika data lurus (penyimpangan ≤ 5 mm), selain itu interpolasi.',
@@ -501,7 +500,7 @@ id:{
  'kpi.tested':'Setting diuji','kpi.total':'Total potongan','kpi.totalS':'hasil ukur terisi','kpi.method':'Metode','kpi.var':'Variasi terbesar','kpi.varS':'maks − min dalam 1 setting',
  'm.rumus':'Rumus','m.interp':'Interpolasi','m.lurus':'data lurus','m.tidak':'data tidak lurus',
  'hero.put':'Pasang setting komputer','hero.saran':'Saran','hero.acc':'Hasil diterima {a}–{b} mm',
- 'b.ok':'Teruji','b.part':'Sebagian teruji','b.est':'Perkiraan','b.need':'Perlu percobaan',
+ 'b.ok':'Teruji','b.part':'Sebagian teruji','b.est':'Perkiraan',
  'n.outData':'Rentang ini di luar setting yang pernah diuji (perpanjangan rumus). Wajib diuji dulu.',
  'n.ends':'Batas rentang belum diuji langsung. Uji setting <b>{a}</b> dan <b>{b}</b> (8 potongan).',
  'n.other':'Rentang lain yang juga aman: {r}','btn.verThis':'Verifikasi setting ini →',
@@ -515,8 +514,8 @@ id:{
  'md.noteI':'Data tidak lurus (kemungkinan ada loncatan/tangga), jadi setting dihitung dengan interpolasi antar titik uji.',
  'md.forced':'Rumus dipaksa padahal data tidak lurus. Hasil di sekitar titik loncatan bisa salah.',
  'eq.res':'Hasil','eq.set':'Setting','eq.setting':'setting',
- 'tbl.desc':'Pesanan {a}–{b} mm · hasil diterima −{m} / +{p} mm',
- 'th.set':'Setting di Komputer (mm)','th.res':'Hasil Potongan (mm)','th.sug':'Saran','th.status':'Status',
+ 
+ 'th.set':'Setting di Komputer (mm)','th.cuts':'Rentang potongan (mm)','th.tested':'Diuji (setting/pcs)','tested.x':'{s} / {n}','tbl.desc2':'Dari data percobaan: {s} setting · {n} potongan. Setting berurutan dengan hasil sama (selisih ≤ {d} mm) digabung.','tbl.foot2':'Baris biru = semua potongannya masuk {a}–{b} mm (aman untuk pesanan {p} mm).','th.res':'Hasil Potongan (mm)',
  'ts.set':'Setting','ts.n':'Terisi','ts.mean':'Rata-rata','ts.min':'Min','ts.max':'Maks','ts.sel':'Selisih','ts.var':'Variasi',
  'v.ok':'stabil','v.mid':'sedang','v.bad':'besar',
  'st.no':'Tahap {n}','st1.t':'Pemetaan kasar','st1.d':'Setting per 50 mm di seluruh rentang pesanan.','st1.p':'({d}/{t} selesai)','st1.done':'Semua titik per 50 mm sudah ada','st1.rec':'Rekomendasi','st1.nInc':'{n} setting belum lengkap','st1.dMan0':'Mengikuti setting yang Anda tambahkan di Data percobaan. Belum ada setting — tambahkan lewat kolom Setting komputer di bawah.','st1.man':'Manual','st1.dMan':'Mengikuti setting di Data percobaan: {d}/{n} setting lengkap (8 potongan). Klik angka untuk mengisi yang belum lengkap.','st1.doneMan':'Semua {n} setting manual sudah lengkap',
@@ -533,7 +532,7 @@ id:{
  'toast.imported':'{n} data dimasukkan','toast.skipped':', {n} baris dilewati','toast.cleared':'Semua data percobaan dihapus','toast.sample':'Contoh data dimuat',
  'toast.added':'{n} setting ditambahkan — isi hasil ukurnya','toast.copied':'Tabel tersalin — tempel di Excel','toast.copyFail':'Gagal menyalin','toast.delVer':'Verifikasi dihapus',
  'err.sp':'Isi setting komputer dulu.','err.dup':'Setting {s} sudah ada.','err.nan':'{n} kolom berisi bukan angka (merah). Kolom tersebut tidak dihitung.',
- 'err.range':'Rentang pesanan tidak valid (Pengaturan).','err.rows':'Baris tabel terlalu banyak. Perbesar jarak antar baris (Pengaturan).',
+ 'err.range':'Rentang pesanan tidak valid (Pengaturan).',
  'x.range':'{a} – {b} mm'
 },
 en:{
@@ -545,7 +544,7 @@ en:{
  'find.title':'Find setting for an order','find.desc':'Enter the ordered cable length','find.label':'Order length',
  'model.title':'Machine model',
  'tbl.title':'Cable cut estimation table','btn.copy':'Copy to Excel',
- 'tbl.foot':'{ok} both range limits tested · {part} / {est} limits calculated from the model, need testing · {need} no data yet',
+ 
  'chart.title':'Cut result chart',
  'lg.pt':'Each cut','lg.mean':'Average','lg.ideal':'Result = setting','lg.fit':'Formula line','lg.ok':'Accepted result','lg.safe':'Safe setting',
  'zoom.all':'All data','zoom.order':'Around order','sum.title':'Summary per setting','sum.desc':'average, min, max, variation',
@@ -560,8 +559,8 @@ en:{
  'ver.order':'Order','ver.setting':'Setting used','ver.date':'Date',
  'set.rules':'Order rules','set.rulesD':'Accepted cut result limits for each order',
  'f.tolMin':'Allowed shorter','h.tolMin':'0 = must not be shorter than the order','f.tolPlus':'Allowed longer','h.tolPlus':'Order 1900 → accepted 1900–1950',
- 'set.tbl':'Estimation table','set.tblD':'Range of order lengths shown in the table',
- 'f.rmin':'Order from','f.rmax':'Order to','f.rstep':'Row interval','h.rstep':'50 → rows 1700, 1750, 1800, …',
+ 'set.tbl':'Mapping range','set.tblD':'Setting range for Stage 1 suggestions (Recommended, every 50 mm)',
+ 'f.rmin':'From','f.rmax':'To',
  'set.method':'Calculation method','set.methodD':'How the app estimates results between tested settings','f.mode':'Method',
  'mode.auto':'Automatic (recommended)','mode.rumus':'Straight-line formula','mode.interp':'Interpolation between points',
  'h.mode':'Automatic: use the formula if data is straight (deviation ≤ 5 mm), otherwise interpolation.',
@@ -570,7 +569,7 @@ en:{
  'kpi.tested':'Settings tested','kpi.total':'Total cuts','kpi.totalS':'measured results','kpi.method':'Method','kpi.var':'Largest variation','kpi.varS':'max − min within 1 setting',
  'm.rumus':'Formula','m.interp':'Interpolation','m.lurus':'straight data','m.tidak':'non-straight data',
  'hero.put':'Set the computer to','hero.saran':'Suggested','hero.acc':'Accepted result {a}–{b} mm',
- 'b.ok':'Tested','b.part':'Partly tested','b.est':'Estimated','b.need':'Needs trial',
+ 'b.ok':'Tested','b.part':'Partly tested','b.est':'Estimated',
  'n.outData':'This range is outside the tested settings (formula extrapolation). It must be tested first.',
  'n.ends':'Range limits not directly tested yet. Test settings <b>{a}</b> and <b>{b}</b> (8 cuts).',
  'n.other':'Other safe ranges: {r}','btn.verThis':'Verify this setting →',
@@ -584,8 +583,8 @@ en:{
  'md.noteI':'Data is not straight (likely steps/jumps), so the setting is calculated by interpolating between tested points.',
  'md.forced':'Formula forced although data is not straight. Results near jump points may be wrong.',
  'eq.res':'Result','eq.set':'Setting','eq.setting':'setting',
- 'tbl.desc':'Order {a}–{b} mm · accepted result −{m} / +{p} mm',
- 'th.set':'Computer Setting (mm)','th.res':'Cut Result (mm)','th.sug':'Suggested','th.status':'Status',
+ 
+ 'th.set':'Computer Setting (mm)','th.cuts':'Cut range (mm)','th.tested':'Tested (settings/pcs)','tested.x':'{s} / {n}','tbl.desc2':'From trial data: {s} settings · {n} cuts. Consecutive settings with the same result (difference ≤ {d} mm) are merged.','tbl.foot2':'Blue rows = all cuts within {a}–{b} mm (safe for order {p} mm).','th.res':'Cut Result (mm)',
  'ts.set':'Setting','ts.n':'Filled','ts.mean':'Average','ts.min':'Min','ts.max':'Max','ts.sel':'Difference','ts.var':'Variation',
  'v.ok':'stable','v.mid':'medium','v.bad':'large',
  'st.no':'Stage {n}','st1.t':'Coarse mapping','st1.d':'Settings every 50 mm across the order range.','st1.p':'({d}/{t} done)','st1.done':'All 50 mm points are present','st1.rec':'Recommended','st1.nInc':'{n} settings incomplete','st1.dMan0':'Follows the settings you add in Trial data. No settings yet — add them with the Computer setting field below.','st1.man':'Manual','st1.dMan':'Follows the settings in Trial data: {d}/{n} complete (8 cuts). Click a number to fill an incomplete one.','st1.doneMan':'All {n} manual settings are complete',
@@ -602,7 +601,7 @@ en:{
  'toast.imported':'{n} values imported','toast.skipped':', {n} rows skipped','toast.cleared':'All trial data cleared','toast.sample':'Sample data loaded',
  'toast.added':'{n} settings added — enter the measured results','toast.copied':'Table copied — paste into Excel','toast.copyFail':'Copy failed','toast.delVer':'Verification deleted',
  'err.sp':'Enter the computer setting first.','err.dup':'Setting {s} already exists.','err.nan':'{n} fields are not numbers (red). They are not counted.',
- 'err.range':'Invalid order range (Settings).','err.rows':'Too many table rows. Increase the row interval (Settings).',
+ 'err.range':'Invalid order range (Settings).',
  'x.range':'{a} – {b} mm'
 },
 zh:{
@@ -614,7 +613,7 @@ zh:{
  'find.title':'查找订单设定值','find.desc':'输入订单线缆长度','find.label':'订单长度',
  'model.title':'机器模型',
  'tbl.title':'线缆裁切估算表','btn.copy':'复制到 Excel',
- 'tbl.foot':'{ok} 范围两端均已测试 · {part} / {est} 范围端点由模型计算，需测试 · {need} 尚无数据',
+ 
  'chart.title':'裁切结果图',
  'lg.pt':'每次裁切','lg.mean':'平均值','lg.ideal':'结果 = 设定值','lg.fit':'公式线','lg.ok':'可接受结果','lg.safe':'安全设定',
  'zoom.all':'全部数据','zoom.order':'订单附近','sum.title':'各设定值汇总','sum.desc':'平均值、最小值、最大值、波动',
@@ -629,8 +628,8 @@ zh:{
  'ver.order':'订单','ver.setting':'所用设定值','ver.date':'日期',
  'set.rules':'订单规则','set.rulesD':'每个订单可接受的裁切结果范围',
  'f.tolMin':'允许偏短','h.tolMin':'0 = 不得短于订单长度','f.tolPlus':'允许偏长','h.tolPlus':'订单 1900 → 可接受 1900–1950',
- 'set.tbl':'估算表','set.tblD':'表中显示的订单长度范围',
- 'f.rmin':'订单起始','f.rmax':'订单结束','f.rstep':'行间隔','h.rstep':'50 → 行 1700、1750、1800 …',
+ 'set.tbl':'映射范围','set.tblD':'阶段 1 建议的设定值范围（推荐，每 50 mm）',
+ 'f.rmin':'从','f.rmax':'到',
  'set.method':'计算方法','set.methodD':'如何估算已测设定值之间的结果','f.mode':'方法',
  'mode.auto':'自动（推荐）','mode.rumus':'直线公式','mode.interp':'点间插值',
  'h.mode':'自动：数据呈直线（偏差 ≤ 5 mm）时用公式，否则用插值。',
@@ -639,7 +638,7 @@ zh:{
  'kpi.tested':'已测设定值','kpi.total':'裁切总数','kpi.totalS':'已填测量结果','kpi.method':'方法','kpi.var':'最大波动','kpi.varS':'同一设定值内 最大−最小',
  'm.rumus':'公式','m.interp':'插值','m.lurus':'数据呈直线','m.tidak':'数据非直线',
  'hero.put':'电脑设定值','hero.saran':'建议','hero.acc':'可接受结果 {a}–{b} mm',
- 'b.ok':'已测试','b.part':'部分测试','b.est':'估算','b.need':'需试验',
+ 'b.ok':'已测试','b.part':'部分测试','b.est':'估算',
  'n.outData':'此范围超出已测设定值（公式外推），必须先测试。',
  'n.ends':'范围端点尚未直接测试。请测试设定值 <b>{a}</b> 和 <b>{b}</b>（各 8 根）。',
  'n.other':'其他安全范围：{r}','btn.verThis':'验证此设定 →',
@@ -653,8 +652,8 @@ zh:{
  'md.noteI':'数据非直线（可能存在台阶/跳变），因此设定值按已测点之间插值计算。',
  'md.forced':'数据非直线却强制使用公式。跳变点附近的结果可能有误。',
  'eq.res':'结果','eq.set':'设定值','eq.setting':'设定值',
- 'tbl.desc':'订单 {a}–{b} mm · 可接受结果 −{m} / +{p} mm',
- 'th.set':'电脑设定值 (mm)','th.res':'裁切结果 (mm)','th.sug':'建议','th.status':'状态',
+ 
+ 'th.set':'电脑设定值 (mm)','th.cuts':'裁切范围 (mm)','th.tested':'已测（设定值/根）','tested.x':'{s} / {n}','tbl.desc2':'来自试验数据：{s} 个设定值 · {n} 根。结果相同（差值 ≤ {d} mm）的连续设定值已合并。','tbl.foot2':'蓝色行 = 全部裁切在 {a}–{b} mm 内（适用于订单 {p} mm）。','th.res':'裁切结果 (mm)',
  'ts.set':'设定值','ts.n':'已填','ts.mean':'平均值','ts.min':'最小','ts.max':'最大','ts.sel':'差值','ts.var':'波动',
  'v.ok':'稳定','v.mid':'中等','v.bad':'较大',
  'st.no':'阶段 {n}','st1.t':'粗略映射','st1.d':'在订单范围内每 50 mm 一个设定值。','st1.p':'（已完成 {d}/{t}）','st1.done':'每 50 mm 的点已齐全','st1.rec':'推荐','st1.nInc':'{n} 个设定值未完成','st1.dMan0':'按您在试验数据中添加的设定值进行。尚无设定值 — 请在下方“电脑设定值”中添加。','st1.man':'手动','st1.dMan':'按试验数据中的设定值：已完成 {d}/{n}（8 根）。点击数字填写未完成的设定值。','st1.doneMan':'{n} 个手动设定值均已完成',
@@ -671,7 +670,7 @@ zh:{
  'toast.imported':'已导入 {n} 个数据','toast.skipped':'，跳过 {n} 行','toast.cleared':'已清除全部试验数据','toast.sample':'已载入示例数据',
  'toast.added':'已添加 {n} 个设定值 — 请填写测量结果','toast.copied':'表格已复制 — 可粘贴到 Excel','toast.copyFail':'复制失败','toast.delVer':'已删除验证',
  'err.sp':'请先输入电脑设定值。','err.dup':'设定值 {s} 已存在。','err.nan':'{n} 个格子不是数字（红色），不计入计算。',
- 'err.range':'订单范围无效（设置）。','err.rows':'表格行数过多。请增大行间隔（设置）。',
+ 'err.range':'订单范围无效（设置）。',
  'x.range':'{a} – {b} mm'
 }};
 let LANG='id';
@@ -871,6 +870,11 @@ function drawChart(S,res,M){
 })();
 
 /* --- render hasil --- */
+const SAME_MM=2;
+function groupRows(S){const rows=[];S.forEach(x=>{const r=rows[rows.length-1];
+    if(r&&Math.abs(x.mean-r.avg)<=SAME_MM){r.b=x.sp;r.items.push(x);r.avg=r.items.reduce((q,i)=>q+i.mean,0)/r.items.length;r.min=Math.min(r.min,x.min);r.max=Math.max(r.max,x.max);r.n+=x.n;r.mMin=Math.min(r.mMin,x.mean);r.mMax=Math.max(r.mMax,x.mean);}
+    else rows.push({a:x.sp,b:x.sp,items:[x],avg:x.mean,min:x.min,max:x.max,n:x.n,mMin:x.mean,mMax:x.mean});});return rows;}
+const resTxt=r=>fmt(Math.round(r.avg),0);
 const best=segs=>segs.length?segs.reduce((a,b)=>(b.b-b.a>a.b-a.a?b:a)):null;
 function rangeTxt(sg){return sg.a===sg.b?fmt(sg.a,0):fmt(sg.a,0)+' ~ '+fmt(sg.b,0);}
 function basis(sg){return sg.tested.length?(sg.endsTested?['ok',t('b.ok')]:['warn',t('b.part')]):['warn',t('b.est')];}
@@ -878,9 +882,8 @@ const eqTxt=f=>`${t('eq.res')} = ${fmt(f.b,5)} × ${t('eq.set')} ${f.a<0?'− '+
 const pill=(k,t)=>`<span class="pill p-${k}">${t}</span>`;
 function render(){
   const S=stats(GROUPS),tolMin=+$('tolMin').value||0,tolPlus=+$('tolPlus').value||0;
-  const rmin=Math.round(+$('rmin').value),rmax=Math.round(+$('rmax').value),rstep=Math.max(1,Math.round(+$('rstep').value||50));
+  const rmin=Math.round(+$('rmin').value),rmax=Math.round(+$('rmax').value);
   if(!(rmax>=rmin))throw new Error(t('err.range'));
-  if((rmax-rmin)/rstep>200)throw new Error(t('err.rows'));
   const full=S.length>=2;
   $('hasilEmpty').classList.toggle('hidden',full);$('hasilFull').classList.toggle('hidden',!full);
   LAST={S};
@@ -929,16 +932,15 @@ function render(){
     if($('mode').value==='rumus'&&!M.lurus&&S.length>=3)mh+=note(t('md.forced'));
     $('modelBox').innerHTML=mh;}
 
-  // tabel utama
-  const rows=[];for(let p=rmin;p<=rmax;p+=rstep)rows.push({p,res:safeRange(S,p,tolMin,tolPlus,M)});LAST.rows=rows;
-  $('tblDesc').textContent=t('tbl.desc',{a:fmt(rmin,0),b:fmt(rmax,0),m:fmt(tolMin,0),p:fmt(tolPlus,0)});
-  $('tblFoot').innerHTML=t('tbl.foot',{ok:pill('ok',t('b.ok')),part:pill('warn',t('b.part')),est:pill('warn',t('b.est')),need:pill('gray',t('b.need'))});
-  $('tblMain').innerHTML=`<thead><tr><th>${t('th.set')}</th><th>${t('th.res')}</th><th class="num">${t('th.sug')}</th><th>${t('th.status')}</th></tr></thead><tbody>`+rows.map(r=>{
-    const sg=best(r.res.segs);const b=sg?basis(sg):['gray',t('b.need')];
-    return `<tr${r.p===P?' class="hl"':''}><td class="strong">${sg?rangeTxt(sg):'<span class="muted">—</span>'}</td><td>${fmt(r.p,0)}</td><td class="num">${sg?fmt(sg.mid,0):'<span class="muted">—</span>'}</td><td>${pill(b[0],b[1])}</td></tr>`;}).join('')+'</tbody>';
-
+  // tabel dari data percobaan: setting berurutan dengan hasil sama (selisih rata-rata <= SAME_MM) digabung
+  const rows=groupRows(S);LAST.rows=rows;
+  const safe=r=>LAST.r&&r.min>=LAST.r.lo-1e-9&&r.max<=LAST.r.hi+1e-9;
+  $('tblDesc').textContent=t('tbl.desc2',{s:S.length,n:S.reduce((q,x)=>q+x.n,0),d:SAME_MM});
+  $('tblFoot').innerHTML=P>0&&LAST.r?t('tbl.foot2',{p:fmt(P,0),a:fmt(LAST.r.lo,0),b:fmt(LAST.r.hi,0)}):'';
+  $('tblMain').innerHTML=`<thead><tr><th>${t('th.set')}</th><th>${t('th.res')}</th><th>${t('th.cuts')}</th><th class="num">${t('th.tested')}</th></tr></thead><tbody>`+rows.map(r=>
+    `<tr${safe(r)?' class="hl"':''}><td class="strong">${r.a===r.b?fmt(r.a,0):fmt(r.a,0)+' ~ '+fmt(r.b,0)}</td><td class="strong">${resTxt(r)}</td><td class="muted">${fmt(r.min)} – ${fmt(r.max)}</td><td class="num muted">${t('tested.x',{s:r.items.length,n:r.n})}</td></tr>`).join('')+'</tbody>';
   scrollHl();
-  renderSug(suggestions(S,rmin,rmax,rows),S);
+  renderSug(suggestions(S,rmin,rmax,[LAST.r]),S);
   drawChart(S,LAST.r||{segs:[],lo:NaN,hi:NaN},M);
 
   $('tblSum').innerHTML=`<thead><tr><th class="num">${t('ts.set')}</th><th class="num">${t('ts.n')}</th><th class="num">${t('ts.mean')}</th><th class="num">${t('ts.min')}</th><th class="num">${t('ts.max')}</th><th class="num">${t('ts.sel')}</th><th class="num">${t('ts.var')}</th><th></th></tr></thead><tbody>`+S.map(x=>{
@@ -989,13 +991,14 @@ $('verBody').addEventListener('click',e=>{const b=e.target.closest('button');if(
 
 /* --- salin --- */
 $('btnCopy').onclick=()=>{if(!LAST.rows)return;
-  const txt=[t('th.set'),t('th.res'),t('th.sug')+' (mm)',t('th.status')].join('\t')+'\n'+LAST.rows.map(r=>{const sg=best(r.res.segs);return [sg?rangeTxt(sg):'-',r.p,sg?sg.mid:'-',sg?basis(sg)[1]:t('b.need')].join('\t');}).join('\n');
+  const txt=[t('th.set'),t('th.res'),t('th.cuts'),t('th.tested')].join('\t')+'\n'+LAST.rows.map(r=>[r.a===r.b?r.a:r.a+' ~ '+r.b,resTxt(r),fmt(r.min)+' – '+fmt(r.max),t('tested.x',{s:r.items.length,n:r.n})].join('\t')).join('\n');
   try{navigator.clipboard.writeText(txt).then(()=>toast(t('toast.copied')),()=>toast(t('toast.copyFail'),1));}catch(e){toast(t('toast.copyFail'),1);}};
 
 /* --- simpan, contoh, auto --- */
-const FIELDS=['tolMin','tolPlus','rmin','rmax','rstep','order','mode'];
-function simpan(){try{localStorage.setItem('kmp3',JSON.stringify({g:GROUPS,v:VERS,c:isContoh,f:FIELDS.map(i=>$(i).value)}));}catch(e){}}
-function muat(){try{const j=JSON.parse(localStorage.getItem('kmp3')||localStorage.getItem('kmp2')||'null');if(!j)return false;if(Array.isArray(j.g))GROUPS=j.g;if(Array.isArray(j.v))VERS=j.v;isContoh=!!j.c;FIELDS.forEach((i,k)=>{if(j.f&&j.f[k]!=null&&j.f[k]!=='')$(i).value=j.f[k];});return true;}catch(e){return false;}}
+const FIELDS=['tolMin','tolPlus','rmin','rmax','order','mode'];
+const OLD_FIELDS=['tolMin','tolPlus','rmin','rmax','rstep','order','mode'];
+function simpan(){try{localStorage.setItem('kmp3',JSON.stringify({g:GROUPS,v:VERS,c:isContoh,fo:Object.fromEntries(FIELDS.map(i=>[i,$(i).value]))}));}catch(e){}}
+function muat(){try{const j=JSON.parse(localStorage.getItem('kmp3')||localStorage.getItem('kmp2')||'null');if(!j)return false;if(Array.isArray(j.g))GROUPS=j.g;if(Array.isArray(j.v))VERS=j.v;isContoh=!!j.c;const fo=j.fo||(Array.isArray(j.f)?Object.fromEntries(OLD_FIELDS.map((i,k)=>[i,j.f[k]])):{});FIELDS.forEach(i=>{if(fo[i]!=null&&fo[i]!=='')$(i).value=fo[i];});return true;}catch(e){return false;}}
 function contoh(){
   let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
   const mesin=s=>s<1770?s:Math.floor(s/50)*50+50;
