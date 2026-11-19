@@ -460,7 +460,8 @@ function suggestions(S,rmin,rmax,lookupRows){
   for(let i=0;i<S.length-1;i++){
     const a=S[i],b=S[i+1],gap=b.sp-a.sp,jump=Math.abs((b.mean-a.mean)-slope*gap); // loncatan = menyimpang dari tren
     if(jump<=5)continue;
-    if(gap>10){for(let s=Math.ceil((a.sp+1)/10)*10;s<b.sp;s+=10)if(!tested.has(s))t2.add(s);}
+    if(gap>100){[.25,.5,.75].forEach(f=>{const s=Math.round((a.sp+gap*f)/10)*10;if(s>a.sp&&s<b.sp&&!tested.has(s))t2.add(s);});} // jarak besar: bagi 4 dulu
+    else if(gap>10){for(let s=Math.ceil((a.sp+1)/10)*10;s<b.sp;s+=10)if(!tested.has(s))t2.add(s);}
     else if(gap>1){const m=Math.round((a.sp+b.sp)/2);if(!tested.has(m))t3.add(m);}
   }
   (lookupRows||[]).forEach(r=>r&&r.segs&&r.segs.forEach(sg=>{[sg.a,sg.b].forEach(e=>{if(!tested.has(e))t3.add(e);});}));
@@ -475,7 +476,7 @@ id:{
  'brand.title':'Kalibrasi Mesin Potong','brand.sub':'Pemetaan setting komputer → hasil potongan kabel · satuan mm',
  'tab.hasil':'Hasil','tab.data':'Data Percobaan','tab.ver':'Verifikasi','tab.set':'Pengaturan',
  'badge.sample':'Contoh data','badge.user':'Data Anda',
- 'banner.txt':'Yang tampil adalah <b>contoh data</b> (hasil sampling potongan fiber 1000–3000 mm, 10 sampel per setting). Hapus dan isi dengan data percobaan Anda.','banner.btn':'Ke Data Percobaan',
+ 'banner.txt':'Yang tampil adalah <b>contoh data</b> (hasil sampling potongan fiber 1000–3000 mm, update 19-11-2026 termasuk sampling awal produksi). Hapus dan isi dengan data percobaan Anda.','banner.btn':'Ke Data Percobaan',
  'empty.title':'Belum cukup data','empty.txt':'Isi minimal 2 setting yang sudah ada hasil ukurnya untuk melihat tabel setting.','empty.btn':'Mulai isi data percobaan',
  'find.title':'Cari setting untuk pesanan','find.desc':'Masukkan panjang kabel yang dipesan','find.label':'Panjang pesanan',
  'model.title':'Model mesin',
@@ -524,7 +525,7 @@ id:{
  'ts.set':'Setting','ts.n':'Terisi','ts.mean':'Rata-rata','ts.min':'Min','ts.max':'Maks','ts.sel':'Selisih','ts.var':'Variasi',
  'v.ok':'stabil','v.mid':'sedang','v.bad':'besar',
  'st.no':'Tahap {n}','st1.t':'Pemetaan kasar','st1.d':'Setting per 50 mm di seluruh rentang pesanan.','st1.p':'({d}/{t} selesai)','st1.done':'Semua titik per 50 mm sudah ada','st1.rec':'Rekomendasi','st1.nInc':'{n} setting belum lengkap','st1.dMan0':'Mengikuti setting yang Anda tambahkan di Data percobaan. Belum ada setting — tambahkan lewat kolom Setting komputer di bawah.','st1.man':'Manual','st1.dMan':'Mengikuti setting di Data percobaan: {d}/{n} setting lengkap (8 potongan). Klik angka untuk mengisi yang belum lengkap.','st1.doneMan':'Semua {n} setting manual sudah lengkap',
- 'st2.t':'Perapatan','st2.d':'Per 10 mm di area yang hasilnya meloncat.','st2.done':'Tidak ada loncatan yang perlu dirapatkan',
+ 'st2.t':'Perapatan','st2.d':'Di area yang hasilnya menyimpang dari tren: jarak > 100 mm dibagi 4 dulu, lalu per 10 mm.','st2.done':'Tidak ada loncatan yang perlu dirapatkan',
  'st3.t':'Batas presisi','st3.d':'Per mm di titik loncatan dan batas rentang tabel.','st3.done':'Semua batas sudah diuji',
  'st.n':'{n} setting disarankan','st.wait1':'Menunggu data Tahap 1','st.wait':'Menunggu data','st.add':'Tambahkan {n} setting','st.more':'+{n} lagi',
  'ax.x':'Setting komputer (mm)','ax.y':'Hasil potongan (mm)',
@@ -544,7 +545,7 @@ en:{
  'brand.title':'Cutting Machine Calibration','brand.sub':'Mapping computer setting → cable cut result · unit mm',
  'tab.hasil':'Results','tab.data':'Trial Data','tab.ver':'Verification','tab.set':'Settings',
  'badge.sample':'Sample data','badge.user':'Your data',
- 'banner.txt':'You are viewing <b>sample data</b> (fiber cut sampling 1000–3000 mm, 10 samples per setting). Clear it and enter your own trial data.','banner.btn':'Go to Trial Data',
+ 'banner.txt':'You are viewing <b>sample data</b> (fiber cut sampling 1000–3000 mm, updated 19-11-2026 incl. production start sampling). Clear it and enter your own trial data.','banner.btn':'Go to Trial Data',
  'empty.title':'Not enough data','empty.txt':'Enter at least 2 settings with measured results to see the setting table.','empty.btn':'Start entering trial data',
  'find.title':'Find setting for an order','find.desc':'Enter the ordered cable length','find.label':'Order length',
  'model.title':'Machine model',
@@ -593,7 +594,7 @@ en:{
  'ts.set':'Setting','ts.n':'Filled','ts.mean':'Average','ts.min':'Min','ts.max':'Max','ts.sel':'Difference','ts.var':'Variation',
  'v.ok':'stable','v.mid':'medium','v.bad':'large',
  'st.no':'Stage {n}','st1.t':'Coarse mapping','st1.d':'Settings every 50 mm across the order range.','st1.p':'({d}/{t} done)','st1.done':'All 50 mm points are present','st1.rec':'Recommended','st1.nInc':'{n} settings incomplete','st1.dMan0':'Follows the settings you add in Trial data. No settings yet — add them with the Computer setting field below.','st1.man':'Manual','st1.dMan':'Follows the settings in Trial data: {d}/{n} complete (8 cuts). Click a number to fill an incomplete one.','st1.doneMan':'All {n} manual settings are complete',
- 'st2.t':'Refinement','st2.d':'Every 10 mm in areas where the result jumps.','st2.done':'No jumps to refine',
+ 'st2.t':'Refinement','st2.d':'Where results deviate from the trend: gaps > 100 mm are split into 4 first, then every 10 mm.','st2.done':'No jumps to refine',
  'st3.t':'Precise limits','st3.d':'Every 1 mm at jump points and table range limits.','st3.done':'All limits tested',
  'st.n':'{n} settings suggested','st.wait1':'Waiting for Stage 1 data','st.wait':'Waiting for data','st.add':'Add {n} settings','st.more':'+{n} more',
  'ax.x':'Computer setting (mm)','ax.y':'Cut result (mm)',
@@ -613,7 +614,7 @@ zh:{
  'brand.title':'裁切机校准','brand.sub':'电脑设定值 → 线缆裁切结果对照 · 单位 mm',
  'tab.hasil':'结果','tab.data':'试验数据','tab.ver':'验证','tab.set':'设置',
  'badge.sample':'示例数据','badge.user':'您的数据',
- 'banner.txt':'当前显示的是<b>示例数据</b>（光纤裁切抽样 1000–3000 mm，每个设定值 10 个样本）。请清除后输入您的试验数据。','banner.btn':'前往试验数据',
+ 'banner.txt':'当前显示的是<b>示例数据</b>（光纤裁切抽样 1000–3000 mm，2026-11-19 更新，含生产初期抽样）。请清除后输入您的试验数据。','banner.btn':'前往试验数据',
  'empty.title':'数据不足','empty.txt':'请至少输入 2 个已有测量结果的设定值，才能查看设定对照表。','empty.btn':'开始输入试验数据',
  'find.title':'查找订单设定值','find.desc':'输入订单线缆长度','find.label':'订单长度',
  'model.title':'机器模型',
@@ -662,7 +663,7 @@ zh:{
  'ts.set':'设定值','ts.n':'已填','ts.mean':'平均值','ts.min':'最小','ts.max':'最大','ts.sel':'差值','ts.var':'波动',
  'v.ok':'稳定','v.mid':'中等','v.bad':'较大',
  'st.no':'阶段 {n}','st1.t':'粗略映射','st1.d':'在订单范围内每 50 mm 一个设定值。','st1.p':'（已完成 {d}/{t}）','st1.done':'每 50 mm 的点已齐全','st1.rec':'推荐','st1.nInc':'{n} 个设定值未完成','st1.dMan0':'按您在试验数据中添加的设定值进行。尚无设定值 — 请在下方“电脑设定值”中添加。','st1.man':'手动','st1.dMan':'按试验数据中的设定值：已完成 {d}/{n}（8 根）。点击数字填写未完成的设定值。','st1.doneMan':'{n} 个手动设定值均已完成',
- 'st2.t':'加密','st2.d':'在结果跳变区域每 10 mm 一个。','st2.done':'没有需要加密的跳变',
+ 'st2.t':'加密','st2.d':'在结果偏离趋势的区域：间隔 > 100 mm 先分成 4 段，再每 10 mm 一个。','st2.done':'没有需要加密的跳变',
  'st3.t':'精确边界','st3.d':'在跳变点和表格范围端点每 1 mm 一个。','st3.done':'所有边界均已测试',
  'st.n':'建议 {n} 个设定值','st.wait1':'等待阶段 1 数据','st.wait':'等待数据','st.add':'添加 {n} 个设定值','st.more':'另有 {n} 个',
  'ax.x':'电脑设定值 (mm)','ax.y':'裁切结果 (mm)',
@@ -1006,7 +1007,7 @@ const OLD_FIELDS=['tolMin','tolPlus','rmin','rmax','rstep','order','mode'];
 function simpan(){try{localStorage.setItem('kmp3',JSON.stringify({g:GROUPS,v:VERS,c:isContoh,fo:Object.fromEntries(FIELDS.map(i=>[i,$(i).value]))}));}catch(e){}}
 function muat(){try{const j=JSON.parse(localStorage.getItem('kmp3')||localStorage.getItem('kmp2')||'null');if(!j)return false;if(Array.isArray(j.g))GROUPS=j.g;if(Array.isArray(j.v))VERS=j.v;isContoh=!!j.c;const fo=j.fo||(Array.isArray(j.f)?Object.fromEntries(OLD_FIELDS.map((i,k)=>[i,j.f[k]])):{});FIELDS.forEach(i=>{if(fo[i]!=null&&fo[i]!=='')$(i).value=fo[i];});return true;}catch(e){return false;}}
 // Contoh data: hasil sampling potongan fiber 1000–3000 mm (file Hasil_Sampling_Potongan_Fiber_1000mm_-_3000mm.xlsx)
-const SAMPLE_DATA={1000:[1006,1002,1002,1002,1002,1002,1002,1002,1002,1002],1500:[1509,1508,1508,1509,1509,1509,1508,1509,1508,1508],2500:[2523,2521,2522,2524,2525,2522,2523,2524,2522,2523],2800:[2825,2829,2826,2827,2828,2827,2829,2828,2830,2829],2850:[2879,2876,2877,2877,2877,2879,2878,2878,2878,2878],3000:[3031,3031,3031,3030,3032,3031,3031,3031,3031,3030]};
+const SAMPLE_DATA={1000:[1006,1002,1002,1002,1002,1002,1002,1002,1002,1002],1500:[1509,1508,1508,1509,1509,1509,1508,1509,1508,1508],1850:[1850,1850,1850,1850,1850,1850,1850,1850,1850,1850,1860],2300:[2330,2330,2330,2330],2500:[2523,2521,2522,2524,2525,2522,2523,2524,2522,2523],2800:[2825,2829,2826,2827,2828,2827,2829,2828,2830,2829],2850:[2879,2876,2877,2877,2877,2879,2878,2878,2878,2878],3000:[3031,3031,3031,3030,3032,3031,3031,3031,3031,3030]};
 function contoh(){
   GROUPS=Object.keys(SAMPLE_DATA).map(Number).sort((a,b)=>a-b).map(sp=>({sp,vals:SAMPLE_DATA[sp].map(String)}));
   $('rmin').value=1000;$('rmax').value=3000;$('newN').value=10;

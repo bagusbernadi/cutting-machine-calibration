@@ -39,7 +39,7 @@ Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di
   1. **Pemetaan kasar**, dengan dua pilihan:
      - *Rekomendasi*: per 50 mm di rentang pesanan.
      - *Manual*: mengikuti setting yang ditambahkan sendiri.
-  2. **Perapatan**: per 10 mm di area yang hasilnya meloncat.
+  2. **Perapatan**: di area yang hasilnya menyimpang dari tren, jarak > 100 mm dibagi 4 dulu, lalu per 10 mm.
   3. **Batas presisi**: per mm di titik loncatan dan batas rentang tabel.
 - Input **satu kolom per potongan**:
   - Validasi otomatis: merah jika bukan angka atau selisih >10% dari setting.
@@ -103,7 +103,7 @@ README.md
 ## Batasan
 
 - Data disimpan di **browser masing-masing perangkat** (localStorage). Data tidak otomatis tersinkron antar perangkat atau antar pengguna, dan bisa hilang jika cache browser dibersihkan. Untuk berbagi, gunakan **Salin ke Excel** atau impor CSV.
-- Contoh data bawaan berasal dari **hasil sampling potongan fiber** (setting 1000, 1500, 2500, 2800, 2850, 3000 mm; 10 sampel per setting). Data ini hanya contoh dan perlu dilengkapi untuk rentang 1500–2500 mm.
+- Contoh data bawaan berasal dari **hasil sampling potongan fiber** (update 19-11-2026): setting 1000, 1500, 1850, 2300, 2500, 2800, 2850, 3000 mm. Setting 1850 dan 2300 berasal dari sampling awal produksi. Data ini hanya contoh dan masih perlu dilengkapi.
 - Tidak ada fitur unduh file (CSV/Excel) di dalam pratinjau artifact. Fitur ini bisa ditambahkan setelah aplikasi berjalan di GitHub Pages.
 
 ---
