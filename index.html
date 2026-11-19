@@ -321,7 +321,7 @@ svg.chart{width:100%;height:auto;display:block}
       <div class="card-b" style="border-bottom:1px solid var(--line)">
         <div class="toolbar">
           <div class="field" style="flex:1;min-width:150px"><label for="newSp" data-i="f.newSp"></label><div class="unit"><input id="newSp" class="inp" type="number" step="1" inputmode="numeric" data-iph="ph.newSp"></div></div>
-          <div class="field" style="width:120px"><label for="newN" data-i="f.newN"></label><input id="newN" class="inp" type="number" min="1" max="50" value="8" inputmode="numeric"></div>
+          <div class="field" style="width:120px"><label for="newN" data-i="f.newN"></label><input id="newN" class="inp" type="number" min="1" max="50" value="10" inputmode="numeric"></div>
           <button class="btn btn-pri" id="btnAddSp" style="height:38px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i="btn.addSp"></span></button>
         </div>
         <div id="msg" class="errline"></div>
@@ -456,8 +456,9 @@ function safeRange(S,P,tolMin,tolPlus,M){
 }
 function suggestions(S,rmin,rmax,lookupRows){
   const tested=new Set(S.map(x=>x.sp));const t1=[],t2=new Set(),t3=new Set();
+  const slope=S.length>=2?fitLine(S).b:1; // tren mesin
   for(let i=0;i<S.length-1;i++){
-    const a=S[i],b=S[i+1],jump=Math.abs(b.sel-a.sel),gap=b.sp-a.sp;
+    const a=S[i],b=S[i+1],gap=b.sp-a.sp,jump=Math.abs((b.mean-a.mean)-slope*gap); // loncatan = menyimpang dari tren
     if(jump<=5)continue;
     if(gap>10){for(let s=Math.ceil((a.sp+1)/10)*10;s<b.sp;s+=10)if(!tested.has(s))t2.add(s);}
     else if(gap>1){const m=Math.round((a.sp+b.sp)/2);if(!tested.has(m))t3.add(m);}
@@ -474,7 +475,7 @@ id:{
  'brand.title':'Kalibrasi Mesin Potong','brand.sub':'Pemetaan setting komputer → hasil potongan kabel · satuan mm',
  'tab.hasil':'Hasil','tab.data':'Data Percobaan','tab.ver':'Verifikasi','tab.set':'Pengaturan',
  'badge.sample':'Contoh data','badge.user':'Data Anda',
- 'banner.txt':'Yang tampil adalah <b>contoh data</b> (simulasi). Hapus dan isi dengan data percobaan Anda.','banner.btn':'Ke Data Percobaan',
+ 'banner.txt':'Yang tampil adalah <b>contoh data</b> (hasil sampling potongan fiber 1000–3000 mm, 10 sampel per setting). Hapus dan isi dengan data percobaan Anda.','banner.btn':'Ke Data Percobaan',
  'empty.title':'Belum cukup data','empty.txt':'Isi minimal 2 setting yang sudah ada hasil ukurnya untuk melihat tabel setting.','empty.btn':'Mulai isi data percobaan',
  'find.title':'Cari setting untuk pesanan','find.desc':'Masukkan panjang kabel yang dipesan','find.label':'Panjang pesanan',
  'model.title':'Model mesin',
@@ -483,7 +484,7 @@ id:{
  'chart.title':'Grafik hasil potongan',
  'lg.pt':'Tiap potongan','lg.mean':'Rata-rata','lg.ideal':'Hasil = setting','lg.fit':'Garis rumus','lg.ok':'Hasil diterima','lg.safe':'Setting aman',
  'zoom.all':'Semua data','zoom.order':'Sekitar pesanan','sum.title':'Ringkasan per setting','sum.desc':'rata-rata, min, maks, variasi',
- 'sug.title':'Saran percobaan berikutnya','sug.desc':'Ikuti tahap 1 → 2 → 3. Klik angka untuk menambahkan setting (8 potongan).',
+ 'sug.title':'Saran percobaan berikutnya','sug.desc':'Ikuti tahap 1 → 2 → 3. Klik angka untuk menambahkan setting (sesuai jumlah potongan).',
  'data.title':'Data percobaan','data.desc':'Isi hasil ukur tiap potongan. Tekan Enter untuk pindah ke kolom berikutnya.',
  'f.newSp':'Setting komputer','ph.newSp':'mis. 1800','f.newN':'Jumlah potongan','btn.addSp':'Tambah setting',
  'btn.import':'Impor dari Excel/CSV','btn.sample':'Isi contoh data','btn.openAll':'Buka semua','btn.closeAll':'Tutup semua','btn.clear':'Hapus semua data','btn.clearArm':'Klik lagi untuk menghapus',
@@ -506,7 +507,7 @@ id:{
  'hero.put':'Pasang setting komputer','hero.saran':'Saran','hero.acc':'Hasil diterima {a}–{b} mm',
  'b.ok':'Teruji','b.part':'Sebagian teruji','b.est':'Perkiraan',
  'n.outData':'Rentang ini di luar setting yang pernah diuji (perpanjangan rumus). Wajib diuji dulu.',
- 'n.ends':'Batas rentang belum diuji langsung. Uji setting <b>{a}</b> dan <b>{b}</b> (8 potongan).',
+ 'n.ends':'Batas rentang belum diuji langsung. Uji setting <b>{a}</b> dan <b>{b}</b> ({n} potongan).',
  'n.other':'Rentang lain yang juga aman: {r}','btn.verThis':'Verifikasi setting ini →',
  'hero.badHead':'Pesanan {p} mm · hasil diterima {a}–{b} mm','hero.none':'Belum ada setting yang aman',
  'n.out':'Pesanan di luar jangkauan data. Tambah percobaan di sekitar setting {p} mm.',
@@ -543,7 +544,7 @@ en:{
  'brand.title':'Cutting Machine Calibration','brand.sub':'Mapping computer setting → cable cut result · unit mm',
  'tab.hasil':'Results','tab.data':'Trial Data','tab.ver':'Verification','tab.set':'Settings',
  'badge.sample':'Sample data','badge.user':'Your data',
- 'banner.txt':'You are viewing <b>sample data</b> (simulation). Clear it and enter your own trial data.','banner.btn':'Go to Trial Data',
+ 'banner.txt':'You are viewing <b>sample data</b> (fiber cut sampling 1000–3000 mm, 10 samples per setting). Clear it and enter your own trial data.','banner.btn':'Go to Trial Data',
  'empty.title':'Not enough data','empty.txt':'Enter at least 2 settings with measured results to see the setting table.','empty.btn':'Start entering trial data',
  'find.title':'Find setting for an order','find.desc':'Enter the ordered cable length','find.label':'Order length',
  'model.title':'Machine model',
@@ -552,7 +553,7 @@ en:{
  'chart.title':'Cut result chart',
  'lg.pt':'Each cut','lg.mean':'Average','lg.ideal':'Result = setting','lg.fit':'Formula line','lg.ok':'Accepted result','lg.safe':'Safe setting',
  'zoom.all':'All data','zoom.order':'Around order','sum.title':'Summary per setting','sum.desc':'average, min, max, variation',
- 'sug.title':'Next trial suggestions','sug.desc':'Follow stage 1 → 2 → 3. Click a number to add that setting (8 cuts).',
+ 'sug.title':'Next trial suggestions','sug.desc':'Follow stage 1 → 2 → 3. Click a number to add that setting (with the set number of cuts).',
  'data.title':'Trial data','data.desc':'Enter the measured result of each cut. Press Enter to move to the next field.',
  'f.newSp':'Computer setting','ph.newSp':'e.g. 1800','f.newN':'Number of cuts','btn.addSp':'Add setting',
  'btn.import':'Import from Excel/CSV','btn.sample':'Load sample data','btn.openAll':'Expand all','btn.closeAll':'Collapse all','btn.clear':'Clear all data','btn.clearArm':'Click again to clear',
@@ -575,7 +576,7 @@ en:{
  'hero.put':'Set the computer to','hero.saran':'Suggested','hero.acc':'Accepted result {a}–{b} mm',
  'b.ok':'Tested','b.part':'Partly tested','b.est':'Estimated',
  'n.outData':'This range is outside the tested settings (formula extrapolation). It must be tested first.',
- 'n.ends':'Range limits not directly tested yet. Test settings <b>{a}</b> and <b>{b}</b> (8 cuts).',
+ 'n.ends':'Range limits not directly tested yet. Test settings <b>{a}</b> and <b>{b}</b> ({n} cuts).',
  'n.other':'Other safe ranges: {r}','btn.verThis':'Verify this setting →',
  'hero.badHead':'Order {p} mm · accepted result {a}–{b} mm','hero.none':'No safe setting yet',
  'n.out':'The order is outside the data range. Add trials around setting {p} mm.',
@@ -612,7 +613,7 @@ zh:{
  'brand.title':'裁切机校准','brand.sub':'电脑设定值 → 线缆裁切结果对照 · 单位 mm',
  'tab.hasil':'结果','tab.data':'试验数据','tab.ver':'验证','tab.set':'设置',
  'badge.sample':'示例数据','badge.user':'您的数据',
- 'banner.txt':'当前显示的是<b>示例数据</b>（模拟）。请清除后输入您的试验数据。','banner.btn':'前往试验数据',
+ 'banner.txt':'当前显示的是<b>示例数据</b>（光纤裁切抽样 1000–3000 mm，每个设定值 10 个样本）。请清除后输入您的试验数据。','banner.btn':'前往试验数据',
  'empty.title':'数据不足','empty.txt':'请至少输入 2 个已有测量结果的设定值，才能查看设定对照表。','empty.btn':'开始输入试验数据',
  'find.title':'查找订单设定值','find.desc':'输入订单线缆长度','find.label':'订单长度',
  'model.title':'机器模型',
@@ -621,7 +622,7 @@ zh:{
  'chart.title':'裁切结果图',
  'lg.pt':'每次裁切','lg.mean':'平均值','lg.ideal':'结果 = 设定值','lg.fit':'公式线','lg.ok':'可接受结果','lg.safe':'安全设定',
  'zoom.all':'全部数据','zoom.order':'订单附近','sum.title':'各设定值汇总','sum.desc':'平均值、最小值、最大值、波动',
- 'sug.title':'下一步试验建议','sug.desc':'按阶段 1 → 2 → 3 进行。点击数字即可添加该设定值（8 次裁切）。',
+ 'sug.title':'下一步试验建议','sug.desc':'按阶段 1 → 2 → 3 进行。点击数字即可添加该设定值（按设定的裁切次数）。',
  'data.title':'试验数据','data.desc':'输入每次裁切的测量结果。按 Enter 跳到下一格。',
  'f.newSp':'电脑设定值','ph.newSp':'例如 1800','f.newN':'裁切次数','btn.addSp':'添加设定值',
  'btn.import':'从 Excel/CSV 导入','btn.sample':'载入示例数据','btn.openAll':'全部展开','btn.closeAll':'全部收起','btn.clear':'清除全部数据','btn.clearArm':'再次点击以清除',
@@ -644,7 +645,7 @@ zh:{
  'hero.put':'电脑设定值','hero.saran':'建议','hero.acc':'可接受结果 {a}–{b} mm',
  'b.ok':'已测试','b.part':'部分测试','b.est':'估算',
  'n.outData':'此范围超出已测设定值（公式外推），必须先测试。',
- 'n.ends':'范围端点尚未直接测试。请测试设定值 <b>{a}</b> 和 <b>{b}</b>（各 8 根）。',
+ 'n.ends':'范围端点尚未直接测试。请测试设定值 <b>{a}</b> 和 <b>{b}</b>（各 {n} 根）。',
  'n.other':'其他安全范围：{r}','btn.verThis':'验证此设定 →',
  'hero.badHead':'订单 {p} mm · 可接受结果 {a}–{b} mm','hero.none':'暂无安全设定值',
  'n.out':'订单超出数据范围。请在设定值 {p} mm 附近增加试验。',
@@ -794,7 +795,7 @@ $('sugBox').addEventListener('click',e=>{const b=e.target.closest('button');if(!
   if(d.t1mode){T1.mode=d.t1mode;saveT1();STEP_OPEN[1]=true;hitung();return;}
   if(d.tog){const s=b.closest('.step');const o=!s.classList.contains('open');s.classList.toggle('open',o);b.setAttribute('aria-expanded',o);STEP_OPEN[d.tog]=o;return;}
   if(d.sug)add=[+d.sug];if(d.all&&LAST.sug)add=LAST.sug[d.all];if(!add.length)return;
-  let n=0;add.forEach(s=>{if(addSetting(s,8))n++;});add.forEach(s=>SET_OPEN[s]=true);if(!n){drawGroups();const gi=GROUPS.findIndex(g=>g.sp===add[0]);const c=gi>=0&&(GROUPS[gi].vals.findIndex(v=>v==='')>=0?GROUPS[gi].vals.findIndex(v=>v===''):0);const el=gi>=0&&$('c'+gi+'_'+c);if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.focus({preventScroll:true});}return;}
+  let n=0;add.forEach(s=>{if(addSetting(s,NCUT()))n++;});add.forEach(s=>SET_OPEN[s]=true);if(!n){drawGroups();const gi=GROUPS.findIndex(g=>g.sp===add[0]);const c=gi>=0&&(GROUPS[gi].vals.findIndex(v=>v==='')>=0?GROUPS[gi].vals.findIndex(v=>v===''):0);const el=gi>=0&&$('c'+gi+'_'+c);if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.focus({preventScroll:true});}return;}
   isContoh=false;drawGroups();changed();
   toast(t('toast.added',{n}));const gi=GROUPS.findIndex(g=>g.sp===add[0]);
   if(gi>=0&&$('c'+gi+'_0')){$('c'+gi+'_0').scrollIntoView({block:'center',behavior:'smooth'});$('c'+gi+'_0').focus({preventScroll:true});}});
@@ -875,6 +876,7 @@ function drawChart(S,res,M){
 
 /* --- render hasil --- */
 const SAME_MM=2;
+const NCUT=()=>Math.min(50,Math.max(1,parseInt($('newN').value)||8));
 function groupRows(S){const rows=[];S.forEach(x=>{const r=rows[rows.length-1];
     if(r&&Math.abs(x.mean-r.avg)<=SAME_MM){r.b=x.sp;r.items.push(x);r.avg=r.items.reduce((q,i)=>q+i.mean,0)/r.items.length;r.min=Math.min(r.min,x.min);r.max=Math.max(r.max,x.max);r.n+=x.n;r.mMin=Math.min(r.mMin,x.mean);r.mMax=Math.max(r.mMax,x.mean);}
     else rows.push({a:x.sp,b:x.sp,items:[x],avg:x.mean,min:x.min,max:x.max,n:x.n,mMin:x.mean,mMax:x.mean});});return rows;}
@@ -914,7 +916,7 @@ function render(){
         <div class="meta"><span>${t('hero.saran')}: <b>${fmt(sg.mid,0)} mm</b></span><span>${t('hero.acc',{a:fmt(r.lo,0),b:fmt(r.hi,0)})}</span>${pill(bk,bt)}</div></div>`;
       if(M.use==='rumus')h+=`<div class="formula">${t('eq.setting')} = (${fmt(tgtMid(P),1)} ${mn(M.fit.a)}) / ${fmt(M.fit.b,5)} = <b>${fmt((tgtMid(P)-M.fit.a)/M.fit.b,1)}</b></div>`;
       if(!sg.inData)h+=note(t('n.outData'));
-      else if(!sg.endsTested)h+=note(t('n.ends',{a:fmt(sg.a,0),b:fmt(sg.b,0)}));
+      else if(!sg.endsTested)h+=note(t('n.ends',{a:fmt(sg.a,0),b:fmt(sg.b,0),n:NCUT()}));
       if(r.segs.length>1)h+=note(t('n.other',{r:r.segs.filter(x=>x!==sg).map(rangeTxt).join(', ')}),'info');
       h+=`<div style="margin-top:12px"><button class="btn btn-sm" id="btnVerThis">${t('btn.verThis')}</button></div>`;
     }else{
@@ -962,7 +964,7 @@ function hitung(){
 
 /* --- verifikasi --- */
 function addVer(p,sp){let tgl='';try{tgl=new Date().toISOString().slice(0,10);}catch(e){}
-  VERS.unshift({p:p||'',sp:sp||'',tgl,vals:Array(8).fill('')});drawVers();simpan();setTimeout(()=>{if($('v0_0'))$('v0_0').focus();},50);}
+  VERS.unshift({p:p||'',sp:sp||'',tgl,vals:Array(NCUT()).fill('')});drawVers();simpan();setTimeout(()=>{if($('v0_0'))$('v0_0').focus();},50);}
 function drawVers(){
   $('verBody').innerHTML=VERS.length?VERS.map((v,vi)=>`<div class="set"><div class="set-h">
     <div class="field" style="width:130px"><label>${t('ver.order')}</label><div class="unit"><input class="inp" data-v="${vi}" data-f="p" type="number" step="1" value="${v.p}"></div></div>
@@ -999,15 +1001,16 @@ $('btnCopy').onclick=()=>{if(!LAST.rows)return;
   try{navigator.clipboard.writeText(txt).then(()=>toast(t('toast.copied')),()=>toast(t('toast.copyFail'),1));}catch(e){toast(t('toast.copyFail'),1);}};
 
 /* --- simpan, contoh, auto --- */
-const FIELDS=['tolMin','tolPlus','rmin','rmax','order','mode'];
+const FIELDS=['tolMin','tolPlus','rmin','rmax','order','mode','newN'];
 const OLD_FIELDS=['tolMin','tolPlus','rmin','rmax','rstep','order','mode'];
 function simpan(){try{localStorage.setItem('kmp3',JSON.stringify({g:GROUPS,v:VERS,c:isContoh,fo:Object.fromEntries(FIELDS.map(i=>[i,$(i).value]))}));}catch(e){}}
 function muat(){try{const j=JSON.parse(localStorage.getItem('kmp3')||localStorage.getItem('kmp2')||'null');if(!j)return false;if(Array.isArray(j.g))GROUPS=j.g;if(Array.isArray(j.v))VERS=j.v;isContoh=!!j.c;const fo=j.fo||(Array.isArray(j.f)?Object.fromEntries(OLD_FIELDS.map((i,k)=>[i,j.f[k]])):{});FIELDS.forEach(i=>{if(fo[i]!=null&&fo[i]!=='')$(i).value=fo[i];});return true;}catch(e){return false;}}
+// Contoh data: hasil sampling potongan fiber 1000–3000 mm (file Hasil_Sampling_Potongan_Fiber_1000mm_-_3000mm.xlsx)
+const SAMPLE_DATA={1000:[1006,1002,1002,1002,1002,1002,1002,1002,1002,1002],1500:[1509,1508,1508,1509,1509,1509,1508,1509,1508,1508],2500:[2523,2521,2522,2524,2525,2522,2523,2524,2522,2523],2800:[2825,2829,2826,2827,2828,2827,2829,2828,2830,2829],2850:[2879,2876,2877,2877,2877,2879,2878,2878,2878,2878],3000:[3031,3031,3031,3030,3032,3031,3031,3031,3031,3030]};
 function contoh(){
-  let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
-  const mesin=s=>s<1770?s:Math.floor(s/50)*50+50;
-  GROUPS=[];for(let s=1000;s<=3000;s+=50){const v=[];for(let i=0;i<8;i++)v.push(String(Math.round((mesin(s)+rnd()*3)*2)/2));GROUPS.push({sp:s,vals:v});}
-  $('rmin').value=1000;$('rmax').value=3000;
+  GROUPS=Object.keys(SAMPLE_DATA).map(Number).sort((a,b)=>a-b).map(sp=>({sp,vals:SAMPLE_DATA[sp].map(String)}));
+  $('rmin').value=1000;$('rmax').value=3000;$('newN').value=10;
+  try{T1={mode:'man'};saveT1();}catch(e){}
   drawGroups();
 }
 function setBanner(){$('banner').classList.toggle('hidden',!isContoh);const b=$('dataBadge');b.className='pill '+(isContoh?'p-warn':'p-ok');b.textContent=isContoh?t('badge.sample'):t('badge.user');}

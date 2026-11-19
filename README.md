@@ -18,7 +18,7 @@ Jika ada pesanan kabel 1900 mm, operator memasang setting di rentang yang hasiln
 
 ## Latar belakang
 
-Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di komputer dan hasil potongnya juga belum diketahui, dan bisa bertangga atau meloncat. Karena itu hubungan tersebut perlu dipetakan dari data percobaan: setiap setting dipotong beberapa kali (default 8 potongan), lalu hasilnya diukur.
+Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di komputer dan hasil potongnya juga belum diketahui, dan bisa bertangga atau meloncat. Karena itu hubungan tersebut perlu dipetakan dari data percobaan: setiap setting dipotong beberapa kali (default 10 potongan), lalu hasilnya diukur.
 
 ## Fitur
 
@@ -66,7 +66,7 @@ Toleransi mesin potong tidak konstan di semua ukuran. Hubungan antara setting di
 1. Buka tab **Pengaturan**, cek toleransi dan rentang pesanan.
 2. Buka tab **Data Percobaan**, klik **Hapus semua data** (dua kali) untuk membuang contoh data.
 3. Di **Tahap 1**, pilih *Rekomendasi* lalu **Tambahkan … setting**, atau pilih *Manual* lalu tambah setting sendiri.
-4. Potong 8 kali di setiap setting, ukur hasilnya, lalu isi kolom Potongan 1–8.
+4. Potong beberapa kali (default 10) di setiap setting, ukur hasilnya, lalu isi kolom Potongan 1–8.
 5. Ikuti **Tahap 2** dan **Tahap 3** sampai semua tahap bercentang hijau.
 6. Di tab **Hasil**, cari pesanan atau salin tabel estimasi ke Excel.
 7. Verifikasi setting di produksi lewat tab **Verifikasi**.
@@ -103,7 +103,7 @@ README.md
 ## Batasan
 
 - Data disimpan di **browser masing-masing perangkat** (localStorage). Data tidak otomatis tersinkron antar perangkat atau antar pengguna, dan bisa hilang jika cache browser dibersihkan. Untuk berbagi, gunakan **Salin ke Excel** atau impor CSV.
-- Contoh data bawaan adalah **simulasi** (mesin bertangga 1000–3000 mm), bukan data mesin nyata.
+- Contoh data bawaan berasal dari **hasil sampling potongan fiber** (setting 1000, 1500, 2500, 2800, 2850, 3000 mm; 10 sampel per setting). Data ini hanya contoh dan perlu dilengkapi untuk rentang 1500–2500 mm.
 - Tidak ada fitur unduh file (CSV/Excel) di dalam pratinjau artifact. Fitur ini bisa ditambahkan setelah aplikasi berjalan di GitHub Pages.
 
 ---
